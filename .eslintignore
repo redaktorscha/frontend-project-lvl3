@@ -1,0 +1,8 @@
+.vscode/
+/node_modules/
+.gitignore
+Makefile
+todo
+dist/
+assets/
+webpack.config.js
