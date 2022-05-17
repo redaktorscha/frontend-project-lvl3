@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "bootstrap": "^5.1.3",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "vercel": "^24.2.3"
   }
 }
