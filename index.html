@@ -17,18 +17,19 @@
             <div class="row">
               <div class="col-6">
                 <label for="rss-link" class="visually-hidden">rss</label>
-                <input class="form-control p-3" type="text" name="rss-link" id="rss-link" placeholder="RSS link">
+                <input data-input="rss" class="form-control p-3" type="text" name="rss-link" id="rss-link" placeholder="RSS link" autofocus required autocomplete="off" aria-label="rss link">
               </div>
               <div class="col-2">
-                <button class="btn btn-outline-primary btn-lg h-100 px-5" type="submit">ADD</button>
+                <button class="btn btn-outline-primary btn-lg h-100 px-5" type="submit" aria-label="add link">ADD</button>
               </div>
             </div>
           </form>
           <p class="text-muted">Example: https://ru.hexlet.io/lessons.rss</p>
+          <p data-element="feedback" class="position-absolute small fw-bold"></p>
         </div>
       </div>
     </section>
-    <section class="container-fluid"></section>
+    <section data-element="container-bottom" class="container-fluid"></section>
   </main>
 
   <footer class="container-fluid d-flex flex-column fixed-bottom align-items-center">

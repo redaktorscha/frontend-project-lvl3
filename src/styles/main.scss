@@ -1,1 +1,6 @@
 @import '~bootstrap/scss/bootstrap';
+
+.invalid {
+  @extend .is-invalid;
+  border-width: 2px;
+}
