@@ -10,30 +10,22 @@ const render = (path, value, prevValue) => { // render (view)
   const {
     form, inputElement, pElement,
   } = htmlElements;
-  if (path === 'rssForm.uiValid') {
-    if (!value) {
-      inputElement.classList.add('invalid');
-    } else {
-      inputElement.classList.remove('invalid');
-    }
+  if (path === 'uiState.rssForm.uiValid') {
+    inputElement.classList.toggle('invalid');
   }
 
-  if (path === 'feedbackField.uiType') {
-    if (!value) {
-      pElement.classList.add('d-none');
-      return;
-    }
+  if (path === 'uiState.feedbackField.uiType') {
     if (value === 'negative') {
-      pElement.classList.remove('d-none', 'text-success');
+      pElement.classList.remove('text-success');
       pElement.classList.add('text-danger');
     }
     if (value === 'positive') {
-      pElement.classList.remove('d-none', 'text-danger');
+      pElement.classList.remove('text-danger');
       pElement.classList.add('text-success');
     }
   }
 
-  if (path === 'feedbackField.message' && value !== prevValue) {
+  if (path === 'uiState.feedbackField.message' && value !== prevValue) {
     pElement.textContent = value;
   }
 

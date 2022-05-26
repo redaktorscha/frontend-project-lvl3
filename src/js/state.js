@@ -1,8 +1,13 @@
 const state = {
   feeds: [],
-  rssForm: {
+  uiState: {
+    rssForm: {
+    },
+    feedbackField: {
+    },
   },
-  feedbackField: {
+  localeState: {
+    languages: ['en', 'ru'],
   },
 };
 
