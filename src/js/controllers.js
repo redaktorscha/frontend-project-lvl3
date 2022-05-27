@@ -1,4 +1,13 @@
 /* eslint-disable no-console */
+import axios from 'axios';
+import _ from 'lodash';
+
+/**
+ * @param {string} url
+ * @returns {string}
+ */
+const getRoute = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${url}`;
+
 /**
  * @param {string} url
  * @param {Object} state
@@ -14,20 +23,36 @@ const validateForm = (url, state, translator, validator) => {
     .notOneOf(feeds, 'exists');
 
   schema.validate(url)
-    .then((result) => {
-      console.log('res', result);
-      feeds.push(result);
+    .then((checkedUrl) => axios.get(getRoute(checkedUrl)))
+  // console.log('res', result);
+    .then(({ data: { contents } }) => {
+      const parser = new DOMParser();
+      const parsedDocument = parser.parseFromString(contents, 'text/xml');
+      if (!_.isNull(parsedDocument.querySelector('parsererror'))) {
+        feedbackField.uiType = 'negative';
+        feedbackField.message = translator.t('parsingFail');
+        return;
+      }
+
+      // feeds.push(data.status.url);
       rssForm.uiValid = true;
       feedbackField.uiType = 'positive'; // remove later
-      const feedbackTextPath = 'network.success'; // remove later
-      feedbackField.message = translator.t(feedbackTextPath);
+      feedbackField.message = translator.t('network.success');
     })
+
     .catch((err) => {
-      rssForm.uiValid = false;
-      feedbackField.uiType = 'negative';
-      const [currentError] = err.errors;
-      console.log(currentError);
-      feedbackField.message = translator.t(`validation.${currentError}`);
+      console.log('err', err);
+      if (err.name === 'ValidationError') {
+        rssForm.uiValid = false;
+        feedbackField.uiType = 'negative';
+        const [currentError] = err.errors;
+        feedbackField.message = translator.t(`validation.${currentError}`);
+      } else if (err.name === 'AxiosError') {
+        feedbackField.uiType = 'negative';
+        feedbackField.message = translator.t('network.fail');
+      } else {
+        console.log(`Unknown error: ${err.message}`);
+      }
     });
 };
 
