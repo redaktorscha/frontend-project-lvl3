@@ -1,5 +1,9 @@
 const state = {
-  feeds: [],
+  data: {
+    checkedLinks: [],
+    feeds: [],
+    posts: [],
+  },
   uiState: {
     rssForm: {
     },

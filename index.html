@@ -3,24 +3,26 @@
 
 <head>
   <meta charset="utf-8" />
-  <title>Webpack App</title>
+  <title>RSS reader</title>
 </head>
 
 <body class="d-flex flex-column min-vh-100 mx-auto">
-  <main class="flex-grow-1">
+  <main class="flex-grow-1 mb-5">
     <section class="container-fluid bg-dark p-5">
       <div class="row">
-        <div class="col-sm-12 col-md-7 col-lg-9 mx-auto">
+        <div class="col-sm-12 col-md-9 col-lg-7 mx-auto">
           <h1 class="display-4 text-white">RSS Reader</h1>
           <p class="lead text-white">Start reading RSS today. Easy-peasy & super-fast!</p>
           <form action="" class="form form-floating">
             <div class="row">
-              <div class="col-6">
+              <div class="col flex-grow-1">
                 <label for="rss-link" class="visually-hidden">rss</label>
-                <input data-input="rss" class="form-control p-3" type="text" name="rss-link" id="rss-link" placeholder="RSS link" autofocus required autocomplete="off" aria-label="rss link">
+                <input data-input="rss" class="form-control p-3" type="text" name="rss-link" id="rss-link"
+                  placeholder="RSS link" autofocus required autocomplete="off" aria-label="rss link">
               </div>
               <div class="col-2">
-                <button class="btn btn-outline-primary btn-lg h-100 px-5" type="submit" aria-label="add link">ADD</button>
+                <button class="btn btn-outline-primary btn-lg h-100 px-5" type="submit"
+                  aria-label="add link">ADD</button>
               </div>
             </div>
           </form>
@@ -29,14 +31,26 @@
         </div>
       </div>
     </section>
-    <section data-element="container-bottom" class="container-fluid"></section>
+    <section data-element="container-bottom" class="container d-none">
+      <div class="row flex-md-column-reverse flex-lg-row py-3 pb-3">
+        <div class="col-md-12 col-lg-9 mx-auto">
+          <h2 class="px-3">Posts</h2>
+          <ul data-element="posts" class="list-group list-group-flush pe-2">
+          </ul>
+        </div>
+        <aside class="col-md-12 col-lg-3 mx-auto">
+          <h2 class="px-3">Feeds</h2>
+          <ul data-element="feeds" class="list-group">
+          </ul>
+        </aside>
+      </div>
+    </section>
   </main>
 
-  <footer class="container-fluid d-flex flex-column fixed-bottom align-items-center">
-    <hr class="my-4 w-100">
-    <p>Created by
-      <span class="text-muted"><a href="https://github.com/redaktorscha">me</a></span>
-    </p>
+  <footer class="container-fluid fixed-bottom d-flex flex-column align-items-center bg-light border-top border-light">
+    <span class="py-3 text-muted">Created by
+      <a class="link-dark" href="https://github.com/redaktorscha">redaktorscha</a>
+    </span>
   </footer>
 </body>
 

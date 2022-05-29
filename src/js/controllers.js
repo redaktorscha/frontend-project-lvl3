@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import axios from 'axios';
-import _ from 'lodash';
+import parseDom from './parser.js';
 
 /**
  * @param {string} url
@@ -15,26 +15,26 @@ const getRoute = (url) => `https://allorigins.hexlet.app/get?disableCache=true&u
  * @param {Object} validator
  */
 const validateForm = (url, state, translator, validator) => {
-  const { feeds, uiState: { rssForm, feedbackField } } = state;
+  const {
+    data: {
+      checkedLinks, feeds, posts,
+    }, uiState: { rssForm, feedbackField },
+  } = state;
 
   const schema = validator.string()
     .trim()
     .url('invalid')
-    .notOneOf(feeds, 'exists');
+    .notOneOf(checkedLinks, 'exists');
 
   schema.validate(url)
-    .then((checkedUrl) => axios.get(getRoute(checkedUrl)))
-  // console.log('res', result);
-    .then(({ data: { contents } }) => {
-      const parser = new DOMParser();
-      const parsedDocument = parser.parseFromString(contents, 'text/xml');
-      if (!_.isNull(parsedDocument.querySelector('parsererror'))) {
-        feedbackField.uiType = 'negative';
-        feedbackField.message = translator.t('parsingFail');
-        return;
-      }
+    .then((checkedUrl) => {
+      checkedLinks.push(checkedUrl);
+      const route = getRoute(checkedUrl);
+      return axios.get(route);
+    })
 
-      // feeds.push(data.status.url);
+    .then(({ data: { contents } }) => {
+      parseDom(contents, feeds, posts); // feeds.push()
       rssForm.uiValid = true;
       feedbackField.uiType = 'positive'; // remove later
       feedbackField.message = translator.t('network.success');
@@ -42,15 +42,17 @@ const validateForm = (url, state, translator, validator) => {
 
     .catch((err) => {
       console.log('err', err);
+      feedbackField.uiType = 'negative';
       if (err.name === 'ValidationError') {
         rssForm.uiValid = false;
-        feedbackField.uiType = 'negative';
         const [currentError] = err.errors;
         feedbackField.message = translator.t(`validation.${currentError}`);
       } else if (err.name === 'AxiosError') {
-        feedbackField.uiType = 'negative';
         feedbackField.message = translator.t('network.fail');
+      } else if (err.name === 'ParsingError') {
+        feedbackField.message = translator.t('parsing.fail');
       } else {
+        feedbackField.message = translator.t('network.fail');
         console.log(`Unknown error: ${err.message}`);
       }
     });
