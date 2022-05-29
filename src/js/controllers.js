@@ -11,15 +11,16 @@ const getRoute = (url) => `https://allorigins.hexlet.app/get?disableCache=true&u
 /**
  * @param {string} url
  * @param {Object} state
- * @param {Object} translator
  * @param {Object} validator
  */
-const validateForm = (url, state, translator, validator) => {
+const validateForm = (url, state, validator) => {
+  console.log('url', url);
   const {
     data: {
       checkedLinks, feeds, posts,
     }, uiState: { rssForm, feedbackField },
   } = state;
+  console.log('checkedLinks', checkedLinks);
 
   const schema = validator.string()
     .trim()
@@ -28,16 +29,20 @@ const validateForm = (url, state, translator, validator) => {
 
   schema.validate(url)
     .then((checkedUrl) => {
-      checkedLinks.push(checkedUrl);
+      console.log('checkedUrl', checkedUrl);
       const route = getRoute(checkedUrl);
+      rssForm.submitDisabled = true; // ?
+      feedbackField.uiState = null;
       return axios.get(route);
     })
 
     .then(({ data: { contents } }) => {
-      parseDom(contents, feeds, posts); // feeds.push()
+      parseDom(contents, feeds, posts);
       rssForm.uiValid = true;
-      feedbackField.uiType = 'positive'; // remove later
-      feedbackField.message = translator.t('network.success');
+      feedbackField.uiType = 'positive';
+      feedbackField.message = 'network.success';
+      rssForm.submitDisabled = false;
+      checkedLinks.push(url);
     })
 
     .catch((err) => {
@@ -46,30 +51,34 @@ const validateForm = (url, state, translator, validator) => {
       if (err.name === 'ValidationError') {
         rssForm.uiValid = false;
         const [currentError] = err.errors;
-        feedbackField.message = translator.t(`validation.${currentError}`);
+        feedbackField.message = `validation.${currentError}`;
       } else if (err.name === 'AxiosError') {
-        feedbackField.message = translator.t('network.fail');
+        feedbackField.message = 'network.fail';
       } else if (err.name === 'ParsingError') {
-        feedbackField.message = translator.t('parsing.fail');
+        feedbackField.message = 'parsing.fail';
       } else {
-        feedbackField.message = translator.t('network.fail');
+        feedbackField.message = 'network.fail';
         console.log(`Unknown error: ${err.message}`);
       }
+
+      rssForm.submitDisabled = false;
     });
 };
 
 /**
  * @param {Event} event
  * @param {Object} state
- * @param {Object} translator
  * @param {Object} validator
  */
-const handleSubmit = (event, state, translator, validator) => {
+const handleSubmit = (event, state, validator) => {
   event.preventDefault();
+  const { uiState: { rssForm, feedbackField } } = state;
+  rssForm.uiValid = true;
+  feedbackField.uiState = null;
   const form = /** @type {HTMLFormElement} */(event.target);
   const formData = new FormData(form);
   const rssLink = String(formData.get('rss-link'));
-  validateForm(rssLink, state, translator, validator);
+  validateForm(rssLink, state, validator);
 };
 
 export default handleSubmit;

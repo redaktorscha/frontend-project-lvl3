@@ -5,8 +5,9 @@ import htmlElements from './htmlElements.js';
  * @param {string} path
  * @param {*} value
  * @param {*} prevValue
+ * @param {Object} translator
  */
-const render = (path, value, prevValue) => { // render (view)
+const render = (path, value, prevValue, translator) => {
   const {
     form, inputElement, pElement, bottomContainer, ulElementFeeds, ulElementPosts,
   } = htmlElements;
@@ -40,7 +41,7 @@ const render = (path, value, prevValue) => { // render (view)
       postLink.textContent = post.title;
       const postButton = document.createElement('button');
       postButton.classList.add('btn', 'btn-primary');
-      postButton.textContent = 'Read';
+      postButton.textContent = translator.t('ui.btnRead'); // ???
       liElement.append(postLink, postButton);
       return liElement;
     });
@@ -54,19 +55,19 @@ const render = (path, value, prevValue) => { // render (view)
     if (value === 'negative') {
       pElement.classList.remove('text-success');
       pElement.classList.add('text-danger');
-    }
-    if (value === 'positive') {
+    } else if (value === 'positive') {
       pElement.classList.remove('text-danger');
       pElement.classList.add('text-success');
+      form.reset();
+      inputElement.focus();
+    } else {
+      pElement.classList.remove('text-danger', 'text-success');
     }
   }
 
   if (path === 'uiState.feedbackField.message' && value !== prevValue) {
-    pElement.textContent = value;
+    pElement.textContent = translator.t(value);
   }
-
-  form.reset();
-  inputElement.focus();
 };
 
 export default render;

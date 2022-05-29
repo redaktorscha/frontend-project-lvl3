@@ -11,5 +11,8 @@ export default {
       success: 'RSS loaded successfully',
       fail: 'Oops, failed to load resource :-(',
     },
+    ui: {
+      btnRead: 'View',
+    },
   },
 };

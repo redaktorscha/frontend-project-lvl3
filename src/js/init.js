@@ -15,11 +15,8 @@ const resources = {
 };
 
 export default () => {
-  const { uiState: { rssForm, feedbackField }, localeState } = state;
-  rssForm.uiValid = true;
-  rssForm.submitDisabled = false;
-  rssForm.processingState = 'filling';
-  feedbackField.uiState = null;
+  const { uiState: { rssForm }, localeState } = state;
+  rssForm.processingState = 'filling'; // ?
 
   yup.setLocale({
     mixed: {
@@ -38,11 +35,13 @@ export default () => {
     debug: true,
     resources,
   }).then(() => {
-    const watchedState = onChange(state, render);
+    const watchedState = onChange(state, (path, value, prevValue) => {
+      render(path, value, prevValue, i18nextInstance);
+    });
     const { form } = htmlElements;
     form.addEventListener(
       'submit',
-      (/** @type {Event} */ e) => handleSubmit(e, watchedState, i18nextInstance, yup),
+      (/** @type {Event} */ e) => handleSubmit(e, watchedState, yup),
     );
   }).catch((error) => console.log(`loading error: ${error.stack}`));
 };
