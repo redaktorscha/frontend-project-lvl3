@@ -9,14 +9,12 @@ import render from './view.js';
 import htmlElements from './htmlElements.js';
 import handleSubmit from './controllers.js';
 
-const defaultLanguage = 'en';
 const resources = {
   en, ru,
 };
 
 export default () => {
-  const { uiState: { rssForm }, localeState } = state;
-  rssForm.processingState = 'filling'; // ?
+  const { localeState } = state;
 
   yup.setLocale({
     mixed: {
@@ -28,10 +26,9 @@ export default () => {
     },
   });
 
-  localeState.languageMode = defaultLanguage;
   const i18nextInstance = i18n.createInstance();
   i18nextInstance.init({
-    lng: defaultLanguage,
+    lng: localeState.languageMode,
     debug: true,
     resources,
   }).then(() => {

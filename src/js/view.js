@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import htmlElements from './htmlElements.js';
+
 /**
  *
  * @param {string} path
@@ -9,7 +10,7 @@ import htmlElements from './htmlElements.js';
  */
 const render = (path, value, prevValue, translator) => {
   const {
-    form, inputElement, pElement, bottomContainer, ulElementFeeds, ulElementPosts,
+    form, inputElement, btnSubmit, pElement, bottomContainer, ulElementFeeds, ulElementPosts,
   } = htmlElements;
   if (path === 'data.feeds') {
     bottomContainer.classList.remove('d-none');
@@ -47,25 +48,39 @@ const render = (path, value, prevValue, translator) => {
     });
     ulElementPosts.append(...posts);
   }
+
   if (path === 'uiState.rssForm.uiValid') {
     inputElement.classList.toggle('invalid');
-  }
-
-  if (path === 'uiState.feedbackField.uiType') {
-    if (value === 'negative') {
+    if (!value) {
       pElement.classList.remove('text-success');
       pElement.classList.add('text-danger');
-    } else if (value === 'positive') {
-      pElement.classList.remove('text-danger');
-      pElement.classList.add('text-success');
-      form.reset();
-      inputElement.focus();
-    } else {
-      pElement.classList.remove('text-danger', 'text-success');
     }
   }
 
-  if (path === 'uiState.feedbackField.message' && value !== prevValue) {
+  if (path === 'uiState.rssForm.processingState') {
+    switch (value) {
+      case 'sending':
+        btnSubmit.setAttribute('disabled', 'disabled');
+        break;
+      case 'processed':
+        btnSubmit.removeAttribute('disabled');
+        pElement.classList.remove('text-danger');
+        pElement.classList.add('text-success');
+        form.reset();
+        inputElement.focus();
+        break;
+      case 'failed':
+        btnSubmit.removeAttribute('disabled');
+        pElement.classList.remove('text-success');
+        pElement.classList.add('text-danger');
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  if (path === 'uiState.rssForm.feedback' && value !== prevValue) {
     pElement.textContent = translator.t(value);
   }
 };

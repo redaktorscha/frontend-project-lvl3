@@ -14,11 +14,10 @@ const getRoute = (url) => `https://allorigins.hexlet.app/get?disableCache=true&u
  * @param {Object} validator
  */
 const validateForm = (url, state, validator) => {
-  console.log('url', url);
   const {
     data: {
       checkedLinks, feeds, posts,
-    }, uiState: { rssForm, feedbackField },
+    }, uiState: { rssForm },
   } = state;
   console.log('checkedLinks', checkedLinks);
 
@@ -29,39 +28,39 @@ const validateForm = (url, state, validator) => {
 
   schema.validate(url)
     .then((checkedUrl) => {
-      console.log('checkedUrl', checkedUrl);
+      rssForm.uiValid = true;
+      rssForm.processingState = 'sending';
+
       const route = getRoute(checkedUrl);
-      rssForm.submitDisabled = true; // ?
-      feedbackField.uiState = null;
       return axios.get(route);
     })
 
     .then(({ data: { contents } }) => {
       parseDom(contents, feeds, posts);
-      rssForm.uiValid = true;
-      feedbackField.uiType = 'positive';
-      feedbackField.message = 'network.success';
-      rssForm.submitDisabled = false;
+
+      rssForm.processingState = 'processed';
+      rssForm.feedback = 'network.success';
       checkedLinks.push(url);
     })
 
     .catch((err) => {
       console.log('err', err);
-      feedbackField.uiType = 'negative';
+
       if (err.name === 'ValidationError') {
         rssForm.uiValid = false;
         const [currentError] = err.errors;
-        feedbackField.message = `validation.${currentError}`;
+        rssForm.feedback = `validation.${currentError}`;
       } else if (err.name === 'AxiosError') {
-        feedbackField.message = 'network.fail';
+        rssForm.processingState = 'failed';
+        rssForm.feedback = 'network.fail';
       } else if (err.name === 'ParsingError') {
-        feedbackField.message = 'parsing.fail';
+        rssForm.processingState = 'failed';
+        rssForm.feedback = 'parsing.fail';
       } else {
-        feedbackField.message = 'network.fail';
+        rssForm.processingState = 'failed';
+        rssForm.feedback = 'network.fail';
         console.log(`Unknown error: ${err.message}`);
       }
-
-      rssForm.submitDisabled = false;
     });
 };
 
@@ -72,9 +71,6 @@ const validateForm = (url, state, validator) => {
  */
 const handleSubmit = (event, state, validator) => {
   event.preventDefault();
-  const { uiState: { rssForm, feedbackField } } = state;
-  rssForm.uiValid = true;
-  feedbackField.uiState = null;
   const form = /** @type {HTMLFormElement} */(event.target);
   const formData = new FormData(form);
   const rssLink = String(formData.get('rss-link'));

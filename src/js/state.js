@@ -7,17 +7,13 @@ const state = {
   uiState: {
     rssForm: {
       uiValid: true,
-      submitDisabled: false,
       processingState: null,
-    },
-    feedbackField: {
-      uiState: null,
-      message: null,
+      feedback: null,
     },
   },
   localeState: {
     languages: ['en', 'ru'],
-    languageMode: null,
+    languageMode: 'en',
   },
 };
 
