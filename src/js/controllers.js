@@ -1,11 +1,8 @@
 /* eslint-disable no-console */
-import axios from 'axios';
 import _ from 'lodash';
 import parseDom from './parser.js';
 
 const allOriginsHexlet = 'https://allorigins.hexlet.app/get?disableCache=true&url=';
-
-const getTextContent = (element) => element.textContent.trim();
 
 /**
  * @param {string} allOrigins
@@ -14,79 +11,43 @@ const getTextContent = (element) => element.textContent.trim();
  */
 const getRoute = (allOrigins, url) => `${allOrigins}${url}`;
 
+const getTextContent = (element) => element.textContent.trim();
+
 /**
  * @param {string} url
  * @param {Object} state
  * @param {Object} validator
  */
-const addRss = (url, state, validator) => {
-  const { data: { feeds, posts }, uiState: { rssForm } } = state;
-
-  const rssLinks = feeds.map((feed) => feed.rssLink); // already added feeds
+const addRss = (url, state, validator, httpClient) => {
+  const {
+    data: {
+      checkedLinks, feeds, posts,
+    }, uiState: { rssForm },
+  } = state;
 
   // validate form
   const schema = validator.string()
     .trim()
     .url('invalid')
-    .notOneOf(rssLinks, 'exists');
+    .notOneOf(checkedLinks, 'exists');
 
   schema.validate(url)
     .then((checkedUrl) => {
       rssForm.uiValid = true;
       rssForm.processingState = 'sending';
 
-      // add feed
-      feeds.push({
-        id: _.uniqueId(),
-        rssLink: checkedUrl,
-        title: null,
-        description: null,
-      });
+      checkedLinks.push(checkedUrl);
 
-      // first http-request
+      // load feed contents
       const route = getRoute(allOriginsHexlet, checkedUrl);
-      return axios.get(route);
+      return httpClient.get(route);
     })
 
     .then(({ data: { contents } }) => {
-      parseDom(contents, feeds, posts);
+      parseDom(contents, feeds, posts, checkedLinks);
 
       rssForm.processingState = 'processed';
       rssForm.feedback = 'network.success';
-    })
-
-    .then(() => {
-      const promises = feeds.map(({ id, rssLink }) => {
-        const route = getRoute(allOriginsHexlet, rssLink);
-        return axios.get(route).then(({ data: { contents } }) => {
-          const parser = new DOMParser();
-          const parsedDocument = parser.parseFromString(contents, 'text/xml');
-          const postElements = parsedDocument.querySelectorAll('item');
-
-          const addedPostsLinks = posts
-            .filter((post) => post.feedId === id)
-            .map((post) => post.link);
-
-          const newPosts = Array.from(postElements)
-            .map((postElement) => {
-              const postId = _.uniqueId();
-              const postTitle = postElement.querySelector('title');
-              const link = postElement.querySelector('link');
-              const postDescription = postElement.querySelector('description');
-              return {
-                id: postId,
-                feedId: id,
-                title: getTextContent(postTitle),
-                description: getTextContent(postDescription),
-                link: getTextContent(link),
-              };
-            })
-            .filter(({ link }) => !addedPostsLinks.includes(link));
-
-          posts.push(...newPosts);
-        }).catch(console.log); // ??
-      });
-      Promise.all(promises);
     })
 
     .catch((err) => {
@@ -114,13 +75,66 @@ const addRss = (url, state, validator) => {
  * @param {Event} event
  * @param {Object} state
  * @param {Object} validator
+ * @param {Object} httpClient
  */
-const handleSubmit = (event, state, validator) => {
+export const handleSubmit = (event, state, validator, httpClient) => {
   event.preventDefault();
   const form = /** @type {HTMLFormElement} */(event.target);
   const formData = new FormData(form);
   const rssLink = String(formData.get('rss-link'));
-  addRss(rssLink, state, validator);
+  addRss(rssLink, state, validator, httpClient);
 };
 
-export default handleSubmit;
+/**
+ *
+ * @param {Object} state
+ * @param {Object} httpClient
+ * @param {number} interval
+ */
+export const getUpdates = (state, httpClient, interval) => {
+  const { data: { feeds, posts }, timer } = state;
+  if (feeds.length === 0) {
+    console.log('no feeds');
+  }
+
+  const promises = feeds.map(({ id, rssLink }) => {
+    const route = getRoute(allOriginsHexlet, rssLink);
+    return httpClient
+      .get(route)
+      .then(({ data: { contents } }) => {
+        console.log('hello from timer');
+        const parser = new DOMParser();
+        const parsedDocument = parser.parseFromString(contents, 'text/xml');
+        const postElements = parsedDocument.querySelectorAll('item');
+        const addedPostsLinks = posts
+          .filter((post) => post.feedId === id)
+          .map((post) => post.link);
+
+        const newPosts = Array.from(postElements) // getPosts
+          .map((postElement) => {
+            const postId = _.uniqueId();
+            const postTitle = postElement.querySelector('title');
+            const link = postElement.querySelector('link');
+            const postDescription = postElement.querySelector('description');
+            return {
+              id: postId,
+              feedId: id,
+              title: getTextContent(postTitle),
+              description: getTextContent(postDescription),
+              link: getTextContent(link),
+            };
+          })
+          .filter(({ link }) => !addedPostsLinks.includes(link));
+        if (!newPosts.length) {
+          console.log('no new');
+        }
+
+        posts.push(...newPosts);
+      })
+      .catch(console.log);
+  });
+
+  Promise.all(promises);
+
+  timer.id = setTimeout(() => { getUpdates(state, httpClient, interval); }, interval);
+};

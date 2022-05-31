@@ -1,5 +1,6 @@
 const state = {
   data: {
+    checkedLinks: [],
     feeds: [],
     posts: [],
   },
@@ -13,6 +14,9 @@ const state = {
   localeState: {
     languages: ['en', 'ru'],
     languageMode: 'en',
+  },
+  timer: {
+    id: null,
   },
 };
 

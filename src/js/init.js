@@ -2,16 +2,19 @@
 import onChange from 'on-change';
 import i18n from 'i18next';
 import * as yup from 'yup';
+import axios from 'axios';
 import state from './state.js';
 import en from '../locales/en.js';
 import ru from '../locales/ru.js';
 import render from './view.js';
 import htmlElements from './htmlElements.js';
-import handleSubmit from './controllers.js';
+import { handleSubmit, getUpdates } from './controllers.js';
 
 const resources = {
   en, ru,
 };
+
+const msInterval = 5000;
 
 export default () => {
   const { localeState } = state;
@@ -35,10 +38,15 @@ export default () => {
     const watchedState = onChange(state, (path, value, prevValue) => {
       render(path, value, prevValue, i18nextInstance);
     });
+
+    watchedState.timer.id = setTimeout(() => {
+      getUpdates(watchedState, axios, msInterval);
+    }, msInterval);
+
     const { form } = htmlElements;
     form.addEventListener(
       'submit',
-      (/** @type {Event} */ e) => handleSubmit(e, watchedState, yup),
+      (/** @type {Event} */ e) => handleSubmit(e, watchedState, yup, axios),
     );
   }).catch((error) => console.log(`loading error: ${error.stack}`));
 };
