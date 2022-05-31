@@ -1,6 +1,5 @@
 const state = {
   data: {
-    checkedLinks: [],
     feeds: [],
     posts: [],
   },

@@ -6,8 +6,15 @@
 ### Technologies:
 - DOM API
 - Promise API
-- Bootstrap
-- Webpack
+- DOM Parser
+- [lodash](https://lodash.com/)
+- [yup](https://github.com/jquense/yup) (validation)
+- [i18next](https://www.i18next.com/) (localisation)
+- [on-сhange](https://github.com/sindresorhus/on-change) (triggers re-render)
+- [axios](https://github.com/axios/axios)
+- [Bootstrap](https://getbootstrap.com/)
+- [Webpack](https://webpack.js.org/)
+- [vercel](https://vercel.com/) (deploy)
 - Github Actions
 
 ### Hexlet tests and linter status:

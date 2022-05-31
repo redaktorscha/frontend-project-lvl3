@@ -24,25 +24,28 @@ const parseDom = (xmlString, feeds, posts) => { // naming?
   if (!_.isNull(parsedDocument.querySelector('parsererror'))) {
     throw new ParsingError('failed to parse');
   }
-  const feedId = _.uniqueId();
+
   const feedTitle = parsedDocument.querySelector('channel > title');
   const feedDescription = parsedDocument.querySelector('channel > description');
 
-  feeds.push({
-    id: feedId,
-    title: getTextContent(feedTitle),
-    description: getTextContent(feedDescription),
-  });
+  // update current feed
+  const lastFeed = feeds[feeds.length - 1];
 
+  lastFeed.title = getTextContent(feedTitle);
+  lastFeed.description = getTextContent(feedDescription);
+  const feedId = lastFeed.id;
+
+  // add posts for current feed
   const postElements = parsedDocument.querySelectorAll('item');
   const newPosts = Array.from(postElements).map((postElement) => {
     const postId = _.uniqueId();
     const postTitle = postElement.querySelector('title');
     const link = postElement.querySelector('link');
     const postDescription = postElement.querySelector('description');
+
     return {
       id: postId,
-      feedId, // ????
+      feedId,
       title: getTextContent(postTitle),
       description: getTextContent(postDescription),
       link: getTextContent(link),
