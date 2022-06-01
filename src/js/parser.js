@@ -15,45 +15,58 @@ const getTextContent = (element) => element.textContent.trim();
 
 /**
  * @param {string} xmlString
- * @param {Array<Object>} feeds
- * @param {Array<Object>} posts
+ * @returns {Document}
  */
-const parseDom = (xmlString, feeds, posts, checkedLinks) => {
+export const parseDom = (xmlString) => {
   const parser = new DOMParser();
-  const parsedDocument = parser.parseFromString(xmlString, 'text/xml');
-  if (!_.isNull(parsedDocument.querySelector('parsererror'))) {
+  const document = parser.parseFromString(xmlString, 'text/xml');
+  if (!_.isNull(document.querySelector('parsererror'))) {
     throw new ParsingError('failed to parse');
   }
-  // getFeeds
-  const feedTitle = parsedDocument.querySelector('channel > title');
-  const feedDescription = parsedDocument.querySelector('channel > description');
-  const feedId = _.uniqueId();
+  return document;
+};
 
-  feeds.push({
+/**
+ *
+ * @param {Document} document
+ * @param {Array<String>} checkedLinks
+ * @param {string} feedId
+ * @returns {Object}
+ */
+export const getFeed = (document, checkedLinks, feedId) => {
+  const feedTitle = document.querySelector('channel > title');
+  const feedDescription = document.querySelector('channel > description');
+  return {
     id: feedId,
     rssLink: checkedLinks[checkedLinks.length - 1],
     title: getTextContent(feedTitle),
     description: getTextContent(feedDescription),
-  });
-
-  // get posts for current feed
-  const postElements = parsedDocument.querySelectorAll('item');
-  const newPosts = Array.from(postElements).map((postElement) => {
-    const postId = _.uniqueId();
-    const postTitle = postElement.querySelector('title');
-    const link = postElement.querySelector('link');
-    const postDescription = postElement.querySelector('description');
-
-    return {
-      id: postId,
-      feedId,
-      title: getTextContent(postTitle),
-      description: getTextContent(postDescription),
-      link: getTextContent(link),
-    };
-  });
-
-  posts.push(...newPosts);
+  };
 };
 
-export default parseDom;
+/**
+ *
+ * @param {Document} document
+ * @param {string} feedId
+ * @returns {Array<Object>}
+ */
+export const getPosts = (document, feedId) => {
+  const postElements = document.querySelectorAll('item');
+  const posts = Array
+    .from(postElements)
+    .map((postElement) => {
+      const postId = _.uniqueId();
+      const postTitle = postElement.querySelector('title');
+      const link = postElement.querySelector('link');
+      const postDescription = postElement.querySelector('description');
+
+      return {
+        id: postId,
+        feedId,
+        title: getTextContent(postTitle),
+        description: getTextContent(postDescription),
+        link: getTextContent(link),
+      };
+    });
+  return posts;
+};

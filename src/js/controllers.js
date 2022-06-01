@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import _ from 'lodash';
-import parseDom from './parser.js';
+import { parseDom, getFeed, getPosts } from './parser.js';
 
 const allOriginsHexlet = 'https://allorigins.hexlet.app/get?disableCache=true&url=';
 
@@ -10,8 +10,6 @@ const allOriginsHexlet = 'https://allorigins.hexlet.app/get?disableCache=true&ur
  * @returns {string}
  */
 const getRoute = (allOrigins, url) => `${allOrigins}${url}`;
-
-const getTextContent = (element) => element.textContent.trim();
 
 /**
  * @param {string} url
@@ -44,7 +42,14 @@ const addRss = (url, state, validator, httpClient) => {
     })
 
     .then(({ data: { contents } }) => {
-      parseDom(contents, feeds, posts, checkedLinks);
+      const parsedContents = parseDom(contents);
+      const feedId = _.uniqueId();
+
+      const newFeed = getFeed(parsedContents, checkedLinks, feedId);
+      feeds.push(newFeed);
+
+      const newPosts = getPosts(parsedContents, feedId);
+      posts.push(...newPosts);
 
       rssForm.processingState = 'processed';
       rssForm.feedback = 'network.success';
@@ -102,36 +107,25 @@ export const getUpdates = (state, httpClient, interval) => {
     return httpClient
       .get(route)
       .then(({ data: { contents } }) => {
-        console.log('hello from timer');
-        const parser = new DOMParser();
-        const parsedDocument = parser.parseFromString(contents, 'text/xml');
-        const postElements = parsedDocument.querySelectorAll('item');
+        const parsedContents = parseDom(contents);
+
         const addedPostsLinks = posts
           .filter((post) => post.feedId === id)
           .map((post) => post.link);
 
-        const newPosts = Array.from(postElements) // getPosts
-          .map((postElement) => {
-            const postId = _.uniqueId();
-            const postTitle = postElement.querySelector('title');
-            const link = postElement.querySelector('link');
-            const postDescription = postElement.querySelector('description');
-            return {
-              id: postId,
-              feedId: id,
-              title: getTextContent(postTitle),
-              description: getTextContent(postDescription),
-              link: getTextContent(link),
-            };
-          })
-          .filter(({ link }) => !addedPostsLinks.includes(link));
-        if (!newPosts.length) {
+        const newPosts = getPosts(parsedContents, id);
+        const filteredPosts = newPosts
+          .filter(({ link }) => !addedPostsLinks.includes(link)); // only new
+
+        if (filteredPosts.length === 0) { // remove later
           console.log('no new');
+        } else {
+          console.log(`got ${filteredPosts.length} new posts`);
         }
 
-        posts.push(...newPosts);
+        posts.push(...filteredPosts);
       })
-      .catch(console.log);
+      .catch(console.log); // ?
   });
 
   Promise.all(promises);
