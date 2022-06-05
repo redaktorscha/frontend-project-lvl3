@@ -98,37 +98,35 @@ export const handleSubmit = (event, state, validator, httpClient) => {
  */
 export const getUpdates = (state, httpClient, interval) => {
   const { data: { feeds, posts }, timer } = state;
-  if (feeds.length === 0) {
-    console.log('no feeds');
+  if (feeds.length > 0) {
+    const promises = feeds.map(({ id, rssLink }) => {
+      const route = getRoute(allOriginsHexlet, rssLink);
+      return httpClient
+        .get(route)
+        .then(({ data: { contents } }) => {
+          const parsedContents = parseDom(contents);
+
+          const addedPostsLinks = posts
+            .filter((post) => post.feedId === id)
+            .map((post) => post.link);
+
+          const newPosts = getPosts(parsedContents, id);
+          const filteredPosts = newPosts
+            .filter(({ link }) => !addedPostsLinks.includes(link));
+
+          if (filteredPosts.length === 0) { // remove later
+            console.log('no new');
+          } else {
+            console.log(`got ${filteredPosts.length} new posts`);
+          }
+
+          posts.push(...filteredPosts);
+        })
+        .catch(console.log); // ?
+    });
+
+    Promise.all(promises);
   }
-
-  const promises = feeds.map(({ id, rssLink }) => {
-    const route = getRoute(allOriginsHexlet, rssLink);
-    return httpClient
-      .get(route)
-      .then(({ data: { contents } }) => {
-        const parsedContents = parseDom(contents);
-
-        const addedPostsLinks = posts
-          .filter((post) => post.feedId === id)
-          .map((post) => post.link);
-
-        const newPosts = getPosts(parsedContents, id);
-        const filteredPosts = newPosts
-          .filter(({ link }) => !addedPostsLinks.includes(link)); // only new
-
-        if (filteredPosts.length === 0) { // remove later
-          console.log('no new');
-        } else {
-          console.log(`got ${filteredPosts.length} new posts`);
-        }
-
-        posts.push(...filteredPosts);
-      })
-      .catch(console.log); // ?
-  });
-
-  Promise.all(promises);
 
   timer.id = setTimeout(() => { getUpdates(state, httpClient, interval); }, interval);
 };
