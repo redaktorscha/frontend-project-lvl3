@@ -55,8 +55,9 @@ const addRss = (url, state, validator, httpClient) => {
   // validate form
   const schema = validator.string()
     .trim()
-    .url('invalid')
-    .notOneOf(checkedLinks, 'exists');
+    .required()
+    .url()
+    .notOneOf(checkedLinks);
 
   schema.validate(url)
     .then((checkedUrl) => {

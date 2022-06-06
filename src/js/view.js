@@ -61,7 +61,7 @@ const render = (path, value, prevValue, translator) => {
       postButton.dataset.bsToggle = 'modal';
       postButton.dataset.bsTarget = '#modal';
       postButton.classList.add('btn', 'btn-primary');
-      postButton.textContent = translator.t('ui.btnRead'); // ???
+      postButton.textContent = translator.t('ui.btnRead');
       liElement.append(postLink, postButton);
       return liElement;
     });

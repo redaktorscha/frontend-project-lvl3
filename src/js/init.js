@@ -23,6 +23,7 @@ export default () => {
     mixed: {
       default: 'something went wrong',
       notOneOf: 'exists',
+      required: 'empty',
     },
     string: {
       url: 'invalid',
