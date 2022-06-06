@@ -66,6 +66,7 @@ export const getPosts = (document, feedId) => {
         title: getTextContent(postTitle),
         description: getTextContent(postDescription),
         link: getTextContent(link),
+        isRead: false,
       };
     });
   return posts;

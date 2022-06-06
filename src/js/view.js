@@ -10,8 +10,19 @@ import htmlElements from './htmlElements.js';
  */
 const render = (path, value, prevValue, translator) => {
   const {
-    form, inputElement, btnSubmit, pElement, bottomContainer, ulElementFeeds, ulElementPosts,
+    form,
+    inputElement,
+    btnSubmit,
+    pElement,
+    bottomContainer,
+    ulElementFeeds,
+    ulElementPosts,
+    modalBox,
+    modalHeading,
+    modalBody,
+    btnReadMore,
   } = htmlElements;
+
   if (path === 'data.feeds') {
     bottomContainer.classList.remove('d-none');
     ulElementFeeds.innerHTML = '';
@@ -38,9 +49,17 @@ const render = (path, value, prevValue, translator) => {
         .add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
       const postLink = document.createElement('a');
       postLink.setAttribute('href', post.link);
-      postLink.classList.add('link-primary');
+      postLink.setAttribute('target', '_blank');
+      if (post.isRead) {
+        postLink.classList.add('link-primary', 'fw-normal', 'text-dark');
+      } else {
+        postLink.classList.add('link-primary', 'fw-bold');
+      }
       postLink.textContent = post.title;
       const postButton = document.createElement('button');
+      postButton.dataset.postId = post.id;
+      postButton.dataset.bsToggle = 'modal';
+      postButton.dataset.bsTarget = '#modal';
       postButton.classList.add('btn', 'btn-primary');
       postButton.textContent = translator.t('ui.btnRead'); // ???
       liElement.append(postLink, postButton);
@@ -82,6 +101,29 @@ const render = (path, value, prevValue, translator) => {
 
   if (path === 'uiState.rssForm.feedback' && value !== prevValue) {
     pElement.textContent = translator.t(value);
+  }
+
+  if (path === 'uiState.modalBox.uiOpen') {
+    modalBox.classList.toggle('show');
+  }
+
+  if (path === 'uiState.modalBox.title') {
+    modalHeading.textContent = value;
+  }
+
+  if (path === 'uiState.modalBox.bodyText') {
+    modalBody.textContent = value;
+  }
+
+  if (path === 'uiState.modalBox.readMoreLink') {
+    btnReadMore.setAttribute('href', value);
+  }
+
+  if (path === 'data.currentPostId') {
+    const selector = `button[data-post-id="${value}"]`;
+    const linkElement = bottomContainer.querySelector(selector).previousElementSibling;
+    linkElement.classList.remove('fw-bold');
+    linkElement.classList.add('fw-normal', 'text-dark');
   }
 };
 

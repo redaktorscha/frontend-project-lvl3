@@ -4,6 +4,23 @@ import { parseDom, getFeed, getPosts } from './parser.js';
 
 const allOriginsHexlet = 'https://allorigins.hexlet.app/get?disableCache=true&url=';
 
+const getCurrentPost = (posts, postId) => {
+  const [currentPost] = posts.filter((post) => post.id === postId);
+  return currentPost;
+};
+
+const updateModalContents = (posts, postId, uiState) => {
+  const { modalBox } = uiState;
+  const [currentPost] = posts.filter((post) => post.id === postId);
+  const {
+    title, description, link,
+  } = currentPost;
+
+  modalBox.title = title;
+  modalBox.bodyText = description;
+  modalBox.readMoreLink = link;
+};
+
 /**
  * @param {string} allOrigins
  * @param {string} url
@@ -129,4 +146,24 @@ export const getUpdates = (state, httpClient, interval) => {
   }
 
   timer.id = setTimeout(() => { getUpdates(state, httpClient, interval); }, interval);
+};
+
+export const handlePostsClick = (event, state) => {
+  const targetElement = event.target;
+  if (targetElement.tagName !== 'BUTTON' && targetElement.tagName !== 'A') {
+    return;
+  }
+
+  const { data, uiState } = state;
+  const { posts } = data;
+  let postId;
+  if (targetElement.tagName === 'BUTTON') {
+    postId = targetElement.dataset.postId;
+    updateModalContents(posts, postId, uiState);
+  } else {
+    postId = targetElement.nextElementSibling.dataset.postId;
+  }
+  data.currentPostId = postId;
+  const currentPost = getCurrentPost(posts, postId);
+  currentPost.isRead = true;
 };

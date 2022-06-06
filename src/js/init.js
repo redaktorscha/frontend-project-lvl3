@@ -8,7 +8,7 @@ import en from '../locales/en.js';
 import ru from '../locales/ru.js';
 import render from './view.js';
 import htmlElements from './htmlElements.js';
-import { handleSubmit, getUpdates } from './controllers.js';
+import { handleSubmit, getUpdates, handlePostsClick } from './controllers.js';
 
 const resources = {
   en, ru,
@@ -43,10 +43,13 @@ export default () => {
       getUpdates(watchedState, axios, msInterval);
     }, msInterval);
 
-    const { form } = htmlElements;
+    const { form, ulElementPosts } = htmlElements;
     form.addEventListener(
       'submit',
       (/** @type {Event} */ e) => handleSubmit(e, watchedState, yup, axios),
     );
+
+    ulElementPosts
+      .addEventListener('click', (/** @type {Event} */ e) => handlePostsClick(e, watchedState));
   }).catch((error) => console.log(`loading error: ${error.stack}`));
 };
