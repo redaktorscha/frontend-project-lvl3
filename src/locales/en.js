@@ -2,6 +2,7 @@ export default {
   translation: {
     validation: {
       exists: 'RSS already exists',
+      empty: 'Should not be empty',
       invalid: 'RSS should be a valid URL',
     },
     parsing: {
@@ -9,7 +10,7 @@ export default {
     },
     network: {
       success: 'RSS loaded successfully',
-      fail: 'Oops, failed to load resource :-(',
+      fail: 'Network error',
     },
     ui: {
       btnRead: 'View',

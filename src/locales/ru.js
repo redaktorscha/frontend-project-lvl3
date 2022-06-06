@@ -2,6 +2,7 @@ export default {
   translation: {
     validation: {
       exists: 'RSS уже существует',
+      empty: 'Не должно быть пустым',
       invalid: 'Ссылка должна быть валидным URL',
     },
     parsing: {
@@ -9,7 +10,7 @@ export default {
     },
     network: {
       success: 'RSS успешно загружен',
-      fail: 'Ой, не получилось загрузить ресурс :-(',
+      fail: 'Ошибка сети',
     },
     ui: {
       btnRead: 'Просмотр',

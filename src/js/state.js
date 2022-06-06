@@ -19,7 +19,7 @@ const state = {
   },
   localeState: {
     languages: ['en', 'ru'],
-    languageMode: 'en',
+    languageMode: 'ru',
   },
   timer: {
     id: null,
