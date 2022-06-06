@@ -4,11 +4,23 @@ import { parseDom, getFeed, getPosts } from './parser.js';
 
 const allOriginsHexlet = 'https://allorigins.hexlet.app/get?disableCache=true&url=';
 
+/**
+ *
+ * @param {Array<Object>} posts
+ * @param {string} postId
+ * @returns {Object}
+ */
 const getCurrentPost = (posts, postId) => {
   const [currentPost] = posts.filter((post) => post.id === postId);
   return currentPost;
 };
 
+/**
+ *
+ * @param {Array<Object>} posts
+ * @param {string} postId
+ * @param {Object} uiState
+ */
 const updateModalContents = (posts, postId, uiState) => {
   const { modalBox } = uiState;
   const [currentPost] = posts.filter((post) => post.id === postId);
