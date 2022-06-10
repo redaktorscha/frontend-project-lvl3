@@ -1,0 +1,60 @@
+` <div class="modal fade" id="modal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+          <a role="button" class="btn btn-primary" href="" target="_blank">Читать полностью</a>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <main class="flex-grow-1 mb-5">
+    <section class="container-fluid bg-dark p-5">
+      <div class="row">
+        <div class="col-sm-12 col-md-9 col-lg-7 mx-auto">
+          <h1 class="display-4 text-white">RSS агрегатор</h1>
+          <p class="lead text-white">Начните читать RSS сегодня! Это легко, это красиво.</p>
+          <form role="form" action="" class="form form-floating">
+            <div class="row">
+              <div class="col flex-grow-1">
+                <label for="rss-link" class="visually-hidden">rss</label>
+                <input data-input="rss" class="form-control p-3" type="text" name="rss-link" id="rss-link"
+                  placeholder="Ссылка RSS" autofocus autocomplete="off" aria-label="rss link">
+              </div>
+              <div class="col-2">
+                <button class="btn btn-outline-primary btn-lg h-100 px-5" type="submit"
+                  aria-label="add link">Добавить</button>
+              </div>
+            </div>
+          </form>
+          <p class="text-muted mt-2">Пример: https://ru.hexlet.io/lessons.rss</p>
+          <p data-element="feedback" class="position-absolute small fw-bold"></p>
+        </div>
+      </div>
+    </section>
+    <section data-element="container-bottom" class="container d-none">
+      <div class="row flex-md-column-reverse flex-lg-row py-3 pb-3">
+        <div class="col-md-12 col-lg-9 mx-auto">
+          <h2 class="px-3">Посты</h2>
+          <ul data-element="posts" class="list-group list-group-flush pe-2">
+          </ul>
+        </div>
+        <aside class="col-md-12 col-lg-3 mx-auto">
+          <h2 class="px-3">Фиды</h2>
+          <ul data-element="feeds" class="list-group">
+          </ul>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container-fluid fixed-bottom d-flex flex-column align-items-center bg-light border-top border-light">
+    <span class="py-3 text-muted">Сделала
+      <a class="link-dark" href="https://github.com/redaktorscha">redaktorscha</a>
+    </span>
+  </footer>`

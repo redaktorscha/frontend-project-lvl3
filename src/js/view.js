@@ -1,14 +1,13 @@
 /* eslint-disable no-console */
-import htmlElements from './htmlElements.js';
-
 /**
  *
  * @param {string} path
  * @param {*} value
  * @param {*} prevValue
  * @param {Object} translator
+ * @param {Object} elements
  */
-const render = (path, value, prevValue, translator) => {
+const render = (path, value, prevValue, translator, elements) => {
   const {
     form,
     inputElement,
@@ -21,7 +20,7 @@ const render = (path, value, prevValue, translator) => {
     modalHeading,
     modalBody,
     btnReadMore,
-  } = htmlElements;
+  } = elements;
 
   if (path === 'data.feeds') {
     bottomContainer.classList.remove('d-none');
