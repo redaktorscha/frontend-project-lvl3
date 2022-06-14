@@ -52,7 +52,6 @@ const addRss = (url, state, validator, httpClient) => {
     }, uiState: { rssForm },
   } = state;
 
-  // validate form
   const schema = validator.string()
     .trim()
     .required()
@@ -66,7 +65,6 @@ const addRss = (url, state, validator, httpClient) => {
 
       checkedLinks.push(checkedUrl);
 
-      // load feed contents
       const route = getRoute(allOriginsHexlet, checkedUrl);
       return httpClient.get(route);
     })
@@ -144,7 +142,7 @@ export const getUpdates = (state, httpClient, interval) => {
           const filteredPosts = newPosts
             .filter(({ link }) => !addedPostsLinks.includes(link));
 
-          if (filteredPosts.length === 0) { // remove later
+          if (filteredPosts.length === 0) {
             console.log('no new');
           } else {
             console.log(`got ${filteredPosts.length} new posts`);
@@ -152,7 +150,7 @@ export const getUpdates = (state, httpClient, interval) => {
 
           posts.push(...filteredPosts);
         })
-        .catch(console.log); // ?
+        .catch(console.log);
     });
 
     Promise.all(promises);
