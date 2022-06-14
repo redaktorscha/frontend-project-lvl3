@@ -45,6 +45,7 @@
     "html-webpack-plugin": "^5.5.0",
     "jest": "^28.1.0",
     "jest-environment-jsdom": "^28.1.1",
+    "nock": "^13.2.6",
     "postcss": "^8.4.13",
     "postcss-loader": "^6.2.1",
     "sass": "^1.51.0",
