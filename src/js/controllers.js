@@ -38,7 +38,7 @@ const updateModalContents = (posts, postId, uiState) => {
  * @param {string} url
  * @returns {string}
  */
-const getRoute = (allOrigins, url) => `${allOrigins}${url}`;
+export const getRoute = (allOrigins, url) => `${allOrigins}${url}`;
 
 /**
  * @param {string} url

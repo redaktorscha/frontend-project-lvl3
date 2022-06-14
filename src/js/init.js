@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import _ from 'lodash';
 import onChange from 'on-change';
 import i18n from 'i18next';
 import * as yup from 'yup';
@@ -16,7 +17,8 @@ const resources = {
 const msInterval = 5000;
 
 export default async () => {
-  const { localeState } = state;
+  const initState = _.cloneDeep(state);
+  const { localeState } = initState;
 
   yup.setLocale({
     mixed: {
@@ -75,7 +77,7 @@ export default async () => {
       modalBody,
       btnReadMore,
     };
-    const watchedState = onChange(state, (path, value, prevValue) => {
+    const watchedState = onChange(initState, (path, value, prevValue) => {
       render(path, value, prevValue, i18nextInstance, htmlElements);
     });
 
