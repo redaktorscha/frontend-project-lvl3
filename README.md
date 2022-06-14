@@ -15,6 +15,7 @@
 - [Bootstrap](https://getbootstrap.com/)
 - [Webpack](https://webpack.js.org/)
 - [vercel](https://vercel.com/) (deploy)
+- [testing library](https://testing-library.com/)
 - Github Actions
 
 ### Hexlet tests and linter status:
