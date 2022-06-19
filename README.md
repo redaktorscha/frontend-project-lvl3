@@ -16,6 +16,7 @@
 - [Webpack](https://webpack.js.org/)
 - [vercel](https://vercel.com/) (deploy)
 - [testing library](https://testing-library.com/)
+- [nock](https://github.com/nock/nock)
 - Github Actions
 
 ### Hexlet tests and linter status:
