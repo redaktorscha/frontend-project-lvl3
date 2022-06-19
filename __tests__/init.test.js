@@ -4,15 +4,20 @@ import { readFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
 import nock from 'nock';
+import axios from 'axios';
 import { test, it, expect } from '@jest/globals';
 import '@testing-library/jest-dom';
-import { screen, waitFor } from '@testing-library/dom';
+import { waitFor, screen } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
+import httpAdapter from 'axios/lib/adapters/http';
 import init from '../src/js/init.js';
 import localeRu from '../src/locales/ru.js';
 
+axios.defaults.adapter = httpAdapter;
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const allOriginsTest = 'https://allorigins.hexlet.app/';
 
 /**
  * @param {string} filename
@@ -34,8 +39,8 @@ const testData = {
   xmlStringValid: null,
   xmlStringInvalid: 'lorem ipsum',
   urlInvalid: 'xx',
-  urlRssValid: 'https://lorem-rss.herokuapp.com/feed',
-  urlRssInvalid: 'https://example.com/',
+  urlRssValid: 'https://valid.com',
+  urlRssInvalid: 'https://invalid.com/',
   feedDescription: 'This is a constantly updating lorem ipsum feed',
   firstPostTitle: 'Lorem ipsum 2022-06-10T19:35:25Z',
 };
@@ -46,11 +51,33 @@ const htmlElements = {
 beforeAll(async () => {
   testData.htmlString = await readFixture('index');
   testData.xmlStringValid = await readFixture('xml-valid');
+  nock.disableNetConnect();
+  nock(allOriginsTest)
+    .persist()
+
+    .get('/get')
+    .query({
+      disableCache: true,
+      url: testData.urlRssValid,
+    })
+    .reply(200, {
+      contents:
+      testData.xmlStringValid,
+    })
+
+    .get('/get')
+    .query({
+      disableCache: true,
+      url: testData.urlRssInvalid,
+    })
+    .reply(200, {
+      contents:
+      testData.xmlStringInvalid,
+    });
 });
 
 beforeEach(async () => {
-  const { htmlString } = testData;
-  document.body.innerHTML = htmlString;
+  document.body.innerHTML = testData.htmlString;
   await init();
   htmlElements.btnSubmit = screen.getByTestId('submit');
   htmlElements.formInput = screen.getByTestId('input');
@@ -58,10 +85,6 @@ beforeEach(async () => {
   htmlElements.feedbackField = screen.getByTestId('feedback');
   htmlElements.modalTitle = screen.getByTestId('modal-title');
 });
-
-afterEach(nock.cleanAll);
-
-afterAll(nock.restore);
 
 describe('submits form successfully', () => {
   it('should display what user types', async () => {
@@ -77,13 +100,7 @@ describe('submits form successfully', () => {
     const {
       formInput, btnSubmit, feedbackField,
     } = htmlElements;
-    const { urlRssValid, xmlStringValid } = testData;
-    nock(urlRssValid)
-      .get('/')
-      .reply(200, {
-        contents: xmlStringValid,
-      });
-
+    const { urlRssValid } = testData;
     const user = userEvent.setup();
     await user.type(formInput, urlRssValid);
     await user.click(btnSubmit);
@@ -93,14 +110,7 @@ describe('submits form successfully', () => {
 
   it('should show feed description', async () => {
     const { formInput, btnSubmit } = htmlElements;
-    const {
-      urlRssValid, xmlStringValid, feedDescription,
-    } = testData;
-    nock(urlRssValid)
-      .get('/')
-      .reply(200, {
-        contents: xmlStringValid,
-      });
+    const { urlRssValid, feedDescription } = testData;
 
     const user = userEvent.setup();
     await user.type(formInput, urlRssValid);
@@ -114,16 +124,12 @@ describe('posts preview', () => {
     const {
       formInput, btnSubmit, modal,
     } = htmlElements;
-    const { urlRssValid, xmlStringValid } = testData;
+    const { urlRssValid } = testData;
 
     const user = userEvent.setup();
     await user.type(formInput, urlRssValid);
     await user.click(btnSubmit);
-    nock(urlRssValid)
-      .get('/')
-      .reply(200, {
-        contents: xmlStringValid,
-      });
+
     let btnPost;
     await waitFor(() => {
       [btnPost] = screen.getAllByRole('button', {
@@ -138,14 +144,7 @@ describe('posts preview', () => {
     const {
       formInput, btnSubmit, modalTitle,
     } = htmlElements;
-    const {
-      urlRssValid, xmlStringValid, firstPostTitle,
-    } = testData;
-    nock(urlRssValid)
-      .get('/')
-      .reply(200, {
-        contents: xmlStringValid,
-      });
+    const { urlRssValid, firstPostTitle } = testData;
 
     const user = userEvent.setup();
     await user.type(formInput, urlRssValid);
@@ -163,7 +162,7 @@ describe('posts preview', () => {
 
 describe('invalid, empty or existing input value', () => {
   const {
-    urlInvalid, urlRssInvalid, urlRssValid, xmlStringValid, xmlStringInvalid,
+    urlInvalid, urlRssValid, urlRssInvalid,
   } = testData;
 
   test('invalid url', async () => {
@@ -190,11 +189,6 @@ describe('invalid, empty or existing input value', () => {
     const user = userEvent.setup();
     await user.type(formInput, urlRssInvalid);
     await user.click(btnSubmit);
-    nock(urlRssInvalid)
-      .get('/')
-      .reply(200, {
-        contents: xmlStringInvalid,
-      });
     expect(await screen.findByText(localeRu.translation.parsing.fail)).toBeVisible();
     expect(await feedbackField.classList.contains('text-danger')).toBe(true);
   });
@@ -206,16 +200,10 @@ describe('invalid, empty or existing input value', () => {
     const user = userEvent.setup();
     await user.type(formInput, urlRssValid);
     await user.click(btnSubmit);
-    nock(urlRssValid)
-      .get('/')
-      .reply(200, {
-        contents: xmlStringValid,
-      });
-
+    formInput.value = '';
     await user.type(formInput, urlRssValid);
     await user.click(btnSubmit);
-
     expect(await screen.findByText(localeRu.translation.validation.exists)).toBeVisible();
     expect(await feedbackField.classList.contains('text-danger')).toBe(true);
-  });
+  }, 30000);
 });

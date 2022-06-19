@@ -44,6 +44,7 @@ export const getRoute = (allOrigins, url) => `${allOrigins}${url}`;
  * @param {string} url
  * @param {Object} state
  * @param {Object} validator
+ * @param {Object} httpClient
  */
 const addRss = (url, state, validator, httpClient) => {
   const {
