@@ -49,9 +49,9 @@ const render = (path, value, prevValue, translator, elements) => {
       postLink.setAttribute('href', post.link);
       postLink.setAttribute('target', '_blank');
       if (post.isRead) {
-        postLink.classList.add('link-primary', 'fw-normal', 'text-dark');
+        postLink.classList.add('fw-normal', 'text-dark');
       } else {
-        postLink.classList.add('link-primary', 'fw-bold');
+        postLink.classList.add('fw-bold');
       }
       postLink.textContent = post.title;
       const postButton = document.createElement('button');
