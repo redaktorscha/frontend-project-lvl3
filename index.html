@@ -9,7 +9,7 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100 mx-auto">
-  <div class="modal fade" id="modal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+  <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -35,11 +35,11 @@
               <div class="col flex-grow-1">
                 <label for="rss-link" class="visually-hidden">rss</label>
                 <input data-input="rss" class="form-control p-3" type="text" name="rss-link" id="rss-link"
-                  placeholder="Ссылка RSS" autofocus autocomplete="off" aria-label="rss link">
+                  placeholder="Ссылка RSS" autofocus autocomplete="off" aria-label="url">
               </div>
               <div class="col-2">
                 <button class="btn btn-outline-primary btn-lg h-100 px-5" type="submit"
-                  aria-label="add link">Добавить</button>
+                  aria-label="add">Добавить</button>
               </div>
             </div>
           </form>
