@@ -21,4 +21,3 @@ rules:
         "ExportDeclaration": "never"
     }]
   max-len: ["error", { "code": 100 }]
-  no-underscore-dangle: [2, { "allow": ["__filename", "__dirname"] }]

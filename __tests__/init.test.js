@@ -1,5 +1,6 @@
 // @ts-nocheck
 /* eslint-disable max-len */
+/* eslint no-underscore-dangle: ["error", { "allow": ["__filename", "__dirname"] }] */
 import { readFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';

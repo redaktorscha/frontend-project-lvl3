@@ -5,4 +5,3 @@ Makefile
 todo
 dist/
 assets/
-webpack.config.js
