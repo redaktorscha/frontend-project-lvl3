@@ -5,14 +5,9 @@ import i18n from 'i18next';
 import * as yup from 'yup';
 import axios from 'axios';
 import state from './state.js';
-import en from '../locales/en.js';
-import ru from '../locales/ru.js';
+import resources from '../locales/index.js';
 import render from './view.js';
 import { handleSubmit, getUpdates, handlePostsClick } from './controllers.js';
-
-const resources = {
-  en, ru,
-};
 
 const msInterval = 5000;
 
@@ -81,7 +76,7 @@ export default async () => {
       render(path, value, prevValue, i18nextInstance, htmlElements);
     });
 
-    watchedState.timer.id = setTimeout(() => {
+    watchedState.timer.id = setTimeout(() => { // remove timerId
       getUpdates(watchedState, axios, msInterval);
     }, msInterval);
 
