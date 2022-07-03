@@ -1,18 +1,33 @@
 /* eslint-disable no-console */
-import _ from 'lodash';
 import onChange from 'on-change';
 import i18n from 'i18next';
 import * as yup from 'yup';
 import axios from 'axios';
-import state from './state.js';
-import resources from '../locales/index.js';
+import resources from './locales/index.js';
 import render from './view.js';
 import { handleSubmit, getUpdates, handlePostsClick } from './controllers.js';
 
 const msInterval = 5000;
 
 export default async () => {
-  const initState = _.cloneDeep(state);
+  const initState = {
+    data: {
+      feeds: [],
+      posts: [],
+    },
+    uiState: {
+      rssForm: {
+        uiValid: true,
+        processingState: null,
+        feedback: null,
+      },
+    },
+    localeState: {
+      languages: ['en', 'ru'],
+      languageMode: 'ru',
+    },
+  };
+
   const { localeState } = initState;
 
   yup.setLocale({
