@@ -11,7 +11,7 @@ import '@testing-library/jest-dom';
 import { waitFor, screen } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
 import httpAdapter from 'axios/lib/adapters/http';
-import init from '../src/js/init.js';
+import init from '../src/init.js';
 import localeRu from '../src/locales/ru.js';
 
 axios.defaults.adapter = httpAdapter;
