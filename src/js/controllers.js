@@ -11,27 +11,27 @@ const allOriginsHexlet = 'https://allorigins.hexlet.app/get?disableCache=true&ur
  * @returns {Object}
  */
 const getCurrentPost = (posts, postId) => {
-  const [currentPost] = posts.filter((post) => post.id === postId);
+  const [currentPost] = posts.filter(({ id }) => id === postId);
   return currentPost;
 };
 
-/**
- *
- * @param {Array<Object>} posts
- * @param {string} postId
- * @param {Object} uiState
- */
-const updateModalContents = (posts, postId, uiState) => {
-  const { modalBox } = uiState;
-  const [currentPost] = posts.filter((post) => post.id === postId);
-  const {
-    title, description, link,
-  } = currentPost;
+//  remove!!!
+//  *
+//  * @param {Array<Object>} posts
+//  * @param {string} postId
+//  * @param {Object} uiState
+//  */
+// const updateModalContents = (posts, postId, uiState) => {
+//   const { modalBox } = uiState;
+//   const [currentPost] = posts.filter((post) => post.id === postId);
+//   const {
+//     title, description, link,
+//   } = currentPost;
 
-  modalBox.title = title;
-  modalBox.bodyText = description;
-  modalBox.readMoreLink = link;
-};
+//   modalBox.title = title;
+//   modalBox.bodyText = description;
+//   modalBox.readMoreLink = link;
+// };
 
 /**
  * @param {string} allOrigins
@@ -51,7 +51,6 @@ const addRss = (url, state, validator, httpClient) => {
   const { feeds, posts } = data;
 
   const existingFeedsLinks = feeds.map((feed) => feed.rssLink);
-  console.log('existingFeedsLinks', existingFeedsLinks);
 
   const schema = validator.string()
     .trim()
@@ -73,14 +72,13 @@ const addRss = (url, state, validator, httpClient) => {
       const requestUrl = response.config.url;
       const originalUrl = requestUrl
         .replace('https://allorigins.hexlet.app/get?disableCache=true&url=', '');
-      console.log('originalUrl', originalUrl);
       const { data: { contents } } = response;
       const parsedContents = parseDom(contents);
       const feedId = _.uniqueId();
 
-      const newFeed = getFeed(parsedContents, originalUrl, feedId); // originalUrl
+      const newFeed = getFeed(parsedContents, originalUrl, feedId);
       data.feeds = [newFeed, ...feeds];
-      console.log('feeds:\n', feeds);
+      // console.log('feeds:\n', feeds);
 
       const newPosts = getPosts(parsedContents, feedId);
       data.posts = [...newPosts, ...posts];
@@ -172,16 +170,23 @@ export const handlePostsClick = (event, state) => {
     return;
   }
 
-  const { data, uiState } = state;
+  const { data } = state;
   const { posts } = data;
-  let postId;
+  let currentPost;
   if (targetElement.tagName === 'BUTTON') {
-    postId = targetElement.dataset.postId;
-    updateModalContents(posts, postId, uiState);
+    const { postId } = targetElement.dataset;
+    currentPost = getCurrentPost(posts, postId);
+    currentPost.isShowing = true;
+    currentPost.isRead = true;
   } else {
-    postId = targetElement.nextElementSibling.dataset.postId;
+    const { postId } = targetElement.nextElementSibling.dataset;
+    currentPost = getCurrentPost(posts, postId);
+    currentPost.isRead = true;
   }
-  data.currentPostId = postId;
-  const currentPost = getCurrentPost(posts, postId);
-  currentPost.isRead = true;
+
+  data.posts.forEach(({ id }, arr, i) => {
+    if (id === currentPost.id) {
+      data.posts[i] = currentPost;
+    }
+  });
 };

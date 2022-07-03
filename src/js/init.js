@@ -39,7 +39,6 @@ export default async () => {
     const bottomContainer = document.querySelector('section[data-element="container-bottom"]');
     const ulElementFeeds = document.querySelector('ul[data-element="feeds"]');
     const ulElementPosts = document.querySelector('ul[data-element="posts"]');
-    const modalBox = document.querySelector('div#modal');
     const modalHeading = document.querySelector('h5.modal-title');
     const modalBody = document.querySelector('div.modal-body');
     const btnReadMore = document.querySelector('.modal-footer > a.btn.btn-primary');
@@ -53,7 +52,6 @@ export default async () => {
  * @property {HTMLElement} bottomContainer
  * @property {HTMLUListElement} ulElementFeeds
  * @property {HTMLUListElement} ulElementPosts
- * @property {HTMLDivElement} modalBox
  * @property {HTMLHeadingElement} modalHeading
  * @property {HTMLDivElement} modalBody
  * @property {HTMLButtonElement} btnReadMore
@@ -67,7 +65,6 @@ export default async () => {
       bottomContainer,
       ulElementFeeds,
       ulElementPosts,
-      modalBox,
       modalHeading,
       modalBody,
       btnReadMore,
@@ -76,9 +73,9 @@ export default async () => {
       render(path, value, prevValue, i18nextInstance, htmlElements);
     });
 
-    watchedState.timer.id = setTimeout(() => { // remove timerId
-      getUpdates(watchedState, axios, msInterval);
-    }, msInterval);
+    // watchedState.timer.id = setTimeout(() => { // remove timerId
+    //   getUpdates(watchedState, axios, msInterval);
+    // }, msInterval);
 
     form.addEventListener(
       'submit',

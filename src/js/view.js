@@ -15,7 +15,6 @@ const render = (path, value, prevValue, translator, elements) => {
     bottomContainer,
     ulElementFeeds,
     ulElementPosts,
-    modalBox,
     modalHeading,
     modalBody,
     btnReadMore,
@@ -40,6 +39,7 @@ const render = (path, value, prevValue, translator, elements) => {
   }
 
   if (path === 'data.posts') {
+    console.log('change posts');
     ulElementPosts.innerHTML = '';
     const posts = [...value].map((post) => {
       const liElement = document.createElement('li');
@@ -52,6 +52,11 @@ const render = (path, value, prevValue, translator, elements) => {
         postLink.classList.add('fw-normal', 'text-dark');
       } else {
         postLink.classList.add('fw-bold');
+      }
+      if (post.isShowing) {
+        modalHeading.textContent = post.title;
+        modalBody.textContent = post.description;
+        btnReadMore.setAttribute('href', post.link);
       }
       postLink.textContent = post.title;
       const postButton = document.createElement('button');
@@ -99,29 +104,6 @@ const render = (path, value, prevValue, translator, elements) => {
 
   if (path === 'uiState.rssForm.feedback' && value !== prevValue) {
     pElement.textContent = translator.t(value);
-  }
-
-  if (path === 'uiState.modalBox.uiOpen') {
-    modalBox.classList.toggle('show');
-  }
-
-  if (path === 'uiState.modalBox.title') {
-    modalHeading.textContent = value;
-  }
-
-  if (path === 'uiState.modalBox.bodyText') {
-    modalBody.textContent = value;
-  }
-
-  if (path === 'uiState.modalBox.readMoreLink') {
-    btnReadMore.setAttribute('href', value);
-  }
-
-  if (path === 'data.currentPostId') {
-    const selector = `button[data-post-id="${value}"]`;
-    const linkElement = bottomContainer.querySelector(selector).previousElementSibling;
-    linkElement.classList.remove('fw-bold');
-    linkElement.classList.add('fw-normal', 'text-dark');
   }
 };
 
