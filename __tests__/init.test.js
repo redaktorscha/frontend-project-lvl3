@@ -172,7 +172,7 @@ describe('invalid, empty or existing input value', () => {
     await user.type(formInput, urlInvalid);
     await user.click(btnSubmit);
     expect(await screen.findByText(localeRu.translation.validation.invalid)).toBeVisible();
-    expect(await formInput.classList.contains('invalid')).toBe(true);
+    expect(await formInput.classList.contains('is-invalid')).toBe(true);
   });
 
   test('empty url', async () => {

@@ -72,7 +72,7 @@ const render = (path, value, prevValue, translator, elements) => {
   }
 
   if (path === 'uiState.rssForm.uiValid') {
-    inputElement.classList.toggle('invalid');
+    inputElement.classList.toggle('is-invalid');
     if (!value) {
       pElement.classList.remove('text-success');
       pElement.classList.add('text-danger');
