@@ -147,8 +147,13 @@ export const handlePostsClick = (event, state) => {
   }
 
   const { posts } = state;
+  let previousPost;
   let currentPost;
   if (targetElement.tagName === 'BUTTON') {
+    [previousPost] = posts.filter(({ isShowing }) => isShowing);
+    if (previousPost) {
+      previousPost.isShowing = false;
+    }
     const { postId } = targetElement.dataset;
     currentPost = getCurrentPost(posts, postId);
     currentPost.isShowing = true;
