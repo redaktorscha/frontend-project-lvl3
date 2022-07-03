@@ -47,38 +47,43 @@ export const getRoute = (allOrigins, url) => `${allOrigins}${url}`;
  * @param {Object} httpClient
  */
 const addRss = (url, state, validator, httpClient) => {
-  const {
-    data: {
-      checkedLinks, feeds, posts,
-    }, uiState: { rssForm },
-  } = state;
+  const { data, uiState: { rssForm } } = state;
+  const { feeds, posts } = data;
+
+  const existingFeedsLinks = feeds.map((feed) => feed.rssLink);
+  console.log('existingFeedsLinks', existingFeedsLinks);
 
   const schema = validator.string()
     .trim()
     .required()
     .url()
-    .notOneOf(checkedLinks);
+    .notOneOf(existingFeedsLinks);
 
   schema.validate(url)
     .then((checkedUrl) => {
       rssForm.uiValid = true;
       rssForm.processingState = 'sending';
 
-      checkedLinks.push(checkedUrl);
-
       const route = getRoute(allOriginsHexlet, checkedUrl);
       return httpClient.get(route);
     })
 
-    .then(({ data: { contents } }) => {
+    .then((response) => {
+      console.log('response config url', response.config.url);
+      const requestUrl = response.config.url;
+      const originalUrl = requestUrl
+        .replace('https://allorigins.hexlet.app/get?disableCache=true&url=', '');
+      console.log('originalUrl', originalUrl);
+      const { data: { contents } } = response;
       const parsedContents = parseDom(contents);
       const feedId = _.uniqueId();
 
-      const newFeed = getFeed(parsedContents, checkedLinks, feedId);
-      feeds.push(newFeed);
+      const newFeed = getFeed(parsedContents, originalUrl, feedId); // originalUrl
+      data.feeds = [newFeed, ...feeds];
+      console.log('feeds:\n', feeds);
 
       const newPosts = getPosts(parsedContents, feedId);
-      posts.push(...newPosts);
+      data.posts = [...newPosts, ...posts];
 
       rssForm.processingState = 'processed';
       rssForm.feedback = 'network.success';
@@ -126,7 +131,8 @@ export const handleSubmit = (event, state, validator, httpClient) => {
  * @param {number} interval
  */
 export const getUpdates = (state, httpClient, interval) => {
-  const { data: { feeds, posts }, timer } = state;
+  const { data, timer } = state;
+  const { feeds, posts } = data; // remove timer
   if (feeds.length > 0) {
     const promises = feeds.map(({ id, rssLink }) => {
       const route = getRoute(allOriginsHexlet, rssLink);
@@ -149,7 +155,7 @@ export const getUpdates = (state, httpClient, interval) => {
             console.log(`got ${filteredPosts.length} new posts`);
           }
 
-          posts.push(...filteredPosts);
+          data.posts = [...filteredPosts, ...posts];
         })
         .catch(console.log);
     });

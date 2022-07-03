@@ -29,16 +29,16 @@ export const parseDom = (xmlString) => {
 /**
  *
  * @param {Document} document
- * @param {Array<String>} checkedLinks
- * @param {string} feedId
+ * @param {string} rssLink
+ * @param {string} id
  * @returns {Object}
  */
-export const getFeed = (document, checkedLinks, feedId) => {
+export const getFeed = (document, rssLink, id) => {
   const feedTitle = document.querySelector('channel > title');
   const feedDescription = document.querySelector('channel > description');
   return {
-    id: feedId,
-    rssLink: checkedLinks[checkedLinks.length - 1],
+    id,
+    rssLink,
     title: getTextContent(feedTitle),
     description: getTextContent(feedDescription),
   };
