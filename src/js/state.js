@@ -14,9 +14,6 @@ const state = {
     languages: ['en', 'ru'],
     languageMode: 'ru',
   },
-  timer: {
-    id: null,
-  },
 };
 
 export default state;

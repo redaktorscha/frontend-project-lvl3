@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import _ from 'lodash';
-import { parseDom, getFeed, getPosts } from './parser.js';
+import parse from './parser.js';
 
 const allOriginsHexlet = 'https://allorigins.hexlet.app/get?disableCache=true&url=';
 
@@ -14,24 +14,6 @@ const getCurrentPost = (posts, postId) => {
   const [currentPost] = posts.filter(({ id }) => id === postId);
   return currentPost;
 };
-
-//  remove!!!
-//  *
-//  * @param {Array<Object>} posts
-//  * @param {string} postId
-//  * @param {Object} uiState
-//  */
-// const updateModalContents = (posts, postId, uiState) => {
-//   const { modalBox } = uiState;
-//   const [currentPost] = posts.filter((post) => post.id === postId);
-//   const {
-//     title, description, link,
-//   } = currentPost;
-
-//   modalBox.title = title;
-//   modalBox.bodyText = description;
-//   modalBox.readMoreLink = link;
-// };
 
 /**
  * @param {string} allOrigins
@@ -68,19 +50,16 @@ const addRss = (url, state, validator, httpClient) => {
     })
 
     .then((response) => {
-      console.log('response config url', response.config.url);
       const requestUrl = response.config.url;
       const originalUrl = requestUrl
-        .replace('https://allorigins.hexlet.app/get?disableCache=true&url=', '');
+        .replace(allOriginsHexlet, '');
       const { data: { contents } } = response;
-      const parsedContents = parseDom(contents);
-      const feedId = _.uniqueId();
 
-      const newFeed = getFeed(parsedContents, originalUrl, feedId);
+      const id = _.uniqueId();
+      const { newFeed, newPosts } = parse(contents, originalUrl, id);
+
       data.feeds = [newFeed, ...feeds];
-      // console.log('feeds:\n', feeds);
 
-      const newPosts = getPosts(parsedContents, feedId);
       data.posts = [...newPosts, ...posts];
 
       rssForm.processingState = 'processed';
@@ -129,23 +108,21 @@ export const handleSubmit = (event, state, validator, httpClient) => {
  * @param {number} interval
  */
 export const getUpdates = (state, httpClient, interval) => {
-  const { data, timer } = state;
-  const { feeds, posts } = data; // remove timer
+  const { data } = state;
+  const { feeds, posts } = data;
   if (feeds.length > 0) {
     const promises = feeds.map(({ id, rssLink }) => {
       const route = getRoute(allOriginsHexlet, rssLink);
       return httpClient
         .get(route)
         .then(({ data: { contents } }) => {
-          const parsedContents = parseDom(contents);
-
-          const addedPostsLinks = posts
+          const existingPostsLinks = posts
             .filter((post) => post.feedId === id)
             .map((post) => post.link);
 
-          const newPosts = getPosts(parsedContents, id);
+          const { newPosts } = parse(contents, rssLink, id);
           const filteredPosts = newPosts
-            .filter(({ link }) => !addedPostsLinks.includes(link));
+            .filter(({ link }) => !existingPostsLinks.includes(link));
 
           if (filteredPosts.length === 0) {
             console.log('no new');
@@ -161,7 +138,7 @@ export const getUpdates = (state, httpClient, interval) => {
     Promise.all(promises);
   }
 
-  timer.id = setTimeout(() => { getUpdates(state, httpClient, interval); }, interval);
+  setTimeout(() => { getUpdates(state, httpClient, interval); }, interval);
 };
 
 export const handlePostsClick = (event, state) => {

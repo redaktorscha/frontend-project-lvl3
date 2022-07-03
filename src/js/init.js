@@ -73,9 +73,9 @@ export default async () => {
       render(path, value, prevValue, i18nextInstance, htmlElements);
     });
 
-    // watchedState.timer.id = setTimeout(() => { // remove timerId
-    //   getUpdates(watchedState, axios, msInterval);
-    // }, msInterval);
+    setTimeout(() => {
+      getUpdates(watchedState, axios, msInterval);
+    }, msInterval);
 
     form.addEventListener(
       'submit',
