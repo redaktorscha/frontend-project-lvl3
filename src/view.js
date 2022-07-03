@@ -20,7 +20,7 @@ const render = (path, value, prevValue, translator, elements) => {
     btnReadMore,
   } = elements;
 
-  if (path === 'data.feeds') {
+  if (path === 'feeds') {
     bottomContainer.classList.remove('d-none');
     ulElementFeeds.innerHTML = '';
     const feeds = [...value].map((feed) => {
@@ -38,7 +38,7 @@ const render = (path, value, prevValue, translator, elements) => {
     ulElementFeeds.append(...feeds);
   }
 
-  if (path === 'data.posts') {
+  if (path === 'posts') {
     console.log('change posts');
     ulElementPosts.innerHTML = '';
     const posts = [...value].map((post) => {
@@ -71,7 +71,7 @@ const render = (path, value, prevValue, translator, elements) => {
     ulElementPosts.append(...posts);
   }
 
-  if (path === 'uiState.rssForm.uiValid') {
+  if (path === 'rssForm.uiValid') {
     inputElement.classList.toggle('is-invalid');
     if (!value) {
       pElement.classList.remove('text-success');
@@ -79,7 +79,7 @@ const render = (path, value, prevValue, translator, elements) => {
     }
   }
 
-  if (path === 'uiState.rssForm.processingState') {
+  if (path === 'rssForm.processingState') {
     switch (value) {
       case 'sending':
         btnSubmit.setAttribute('disabled', 'disabled');
@@ -102,7 +102,7 @@ const render = (path, value, prevValue, translator, elements) => {
     }
   }
 
-  if (path === 'uiState.rssForm.feedback' && value !== prevValue) {
+  if (path === 'rssForm.feedback' && value !== prevValue) {
     pElement.textContent = translator.t(value);
   }
 };

@@ -11,16 +11,12 @@ const msInterval = 5000;
 
 export default async () => {
   const initState = {
-    data: {
-      feeds: [],
-      posts: [],
-    },
-    uiState: {
-      rssForm: {
-        uiValid: true,
-        processingState: null,
-        feedback: null,
-      },
+    feeds: [],
+    posts: [],
+    rssForm: {
+      uiValid: true,
+      processingState: null,
+      feedback: null,
     },
     localeState: {
       languages: ['en', 'ru'],

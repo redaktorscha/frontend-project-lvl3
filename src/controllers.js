@@ -29,8 +29,9 @@ export const getRoute = (allOrigins, url) => `${allOrigins}${url}`;
  * @param {Object} httpClient
  */
 const addRss = (url, state, validator, httpClient) => {
-  const { data, uiState: { rssForm } } = state;
-  const { feeds, posts } = data;
+  const {
+    feeds, posts, rssForm,
+  } = state;
 
   const existingFeedsLinks = feeds.map((feed) => feed.rssLink);
 
@@ -58,9 +59,9 @@ const addRss = (url, state, validator, httpClient) => {
       const id = _.uniqueId();
       const { newFeed, newPosts } = parse(contents, originalUrl, id);
 
-      data.feeds = [newFeed, ...feeds];
+      state.feeds = [newFeed, ...feeds];
 
-      data.posts = [...newPosts, ...posts];
+      state.posts = [...newPosts, ...posts];
 
       rssForm.processingState = 'processed';
       rssForm.feedback = 'network.success';
@@ -108,8 +109,7 @@ export const handleSubmit = (event, state, validator, httpClient) => {
  * @param {number} interval
  */
 export const getUpdates = (state, httpClient, interval) => {
-  const { data } = state;
-  const { feeds, posts } = data;
+  const { feeds, posts } = state;
   if (feeds.length > 0) {
     const promises = feeds.map(({ id, rssLink }) => {
       const route = getRoute(allOriginsHexlet, rssLink);
@@ -126,11 +126,10 @@ export const getUpdates = (state, httpClient, interval) => {
 
           if (filteredPosts.length === 0) {
             console.log('no new');
-          } else {
-            console.log(`got ${filteredPosts.length} new posts`);
+            return;
           }
-
-          data.posts = [...filteredPosts, ...posts];
+          console.log(`got ${filteredPosts.length} new posts`);
+          state.posts = [...filteredPosts, ...posts];
         })
         .catch(console.log);
     });
@@ -147,8 +146,7 @@ export const handlePostsClick = (event, state) => {
     return;
   }
 
-  const { data } = state;
-  const { posts } = data;
+  const { posts } = state;
   let currentPost;
   if (targetElement.tagName === 'BUTTON') {
     const { postId } = targetElement.dataset;
@@ -161,9 +159,9 @@ export const handlePostsClick = (event, state) => {
     currentPost.isRead = true;
   }
 
-  data.posts.forEach(({ id }, arr, i) => {
+  state.posts.forEach(({ id }, arr, i) => {
     if (id === currentPost.id) {
-      data.posts[i] = currentPost;
+      state.posts[i] = currentPost;
     }
   });
 };

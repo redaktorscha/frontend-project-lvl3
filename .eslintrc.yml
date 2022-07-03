@@ -21,3 +21,4 @@ rules:
         "ExportDeclaration": "never"
     }]
   max-len: ["error", { "code": 100 }]
+  no-param-reassign: ["error", { "props": false }]
