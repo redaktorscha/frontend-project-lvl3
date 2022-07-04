@@ -23,12 +23,17 @@ const getCurrentPost = (posts, postId) => {
 export const getRoute = (allOrigins, url) => `${allOrigins}${url}`;
 
 /**
- * @param {string} url
+ * @param {Event} event
  * @param {Object} state
  * @param {Object} validator
  * @param {Object} httpClient
  */
-const addRss = (url, state, validator, httpClient) => {
+export const handleSubmit = (event, state, validator, httpClient) => {
+  event.preventDefault();
+  const form = /** @type {HTMLFormElement} */(event.target);
+  const formData = new FormData(form);
+  const rssLink = String(formData.get('rss-link'));
+
   const {
     feeds, posts, rssForm,
   } = state;
@@ -41,7 +46,7 @@ const addRss = (url, state, validator, httpClient) => {
     .url()
     .notOneOf(existingFeedsLinks);
 
-  schema.validate(url)
+  schema.validate(rssLink)
     .then((checkedUrl) => {
       rssForm.uiValid = true;
       rssForm.processingState = 'sending';
@@ -86,20 +91,6 @@ const addRss = (url, state, validator, httpClient) => {
         console.log(`Unknown error: ${err.message}`);
       }
     });
-};
-
-/**
- * @param {Event} event
- * @param {Object} state
- * @param {Object} validator
- * @param {Object} httpClient
- */
-export const handleSubmit = (event, state, validator, httpClient) => {
-  event.preventDefault();
-  const form = /** @type {HTMLFormElement} */(event.target);
-  const formData = new FormData(form);
-  const rssLink = String(formData.get('rss-link'));
-  addRss(rssLink, state, validator, httpClient);
 };
 
 /**
