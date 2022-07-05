@@ -18,13 +18,9 @@ export default async () => {
       processingState: null,
       feedback: null,
     },
-    localeState: {
-      languages: ['en', 'ru'],
-      languageMode: 'ru',
-    },
   };
 
-  const { localeState } = initState;
+  const defaultLanguage = 'ru';
 
   yup.setLocale({
     mixed: {
@@ -39,7 +35,7 @@ export default async () => {
 
   const i18nextInstance = i18n.createInstance();
   i18nextInstance.init({
-    lng: localeState.languageMode,
+    lng: defaultLanguage,
     debug: false,
     resources,
   }).then(() => {
