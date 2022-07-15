@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import parse from './parser.js';
 
-const allOriginsHexlet = 'https://allorigins.hexlet.app/get?disableCache=true&url=';
+const allOriginsHexlet = 'https://allorigins.hexlet.app/get?disableCache=true';
 
 /**
  *
@@ -20,7 +20,27 @@ const getCurrentPost = (posts, postId) => {
  * @param {string} url
  * @returns {string}
  */
-export const getRoute = (allOrigins, url) => `${allOrigins}${url}`;
+export const getRoute = (allOrigins, url) => {
+  const allOriginsUrl = new URL(allOrigins);
+  allOriginsUrl.searchParams.append('url', url);
+  return allOriginsUrl.href;
+};
+
+/**
+ * @param {Array} posts
+ * @param {string} feedId
+ * @returns {Array}
+ */
+const processPosts = (posts, feedId) => posts
+  .map((post) => ({
+    ...post,
+    ...{
+      id: _.uniqueId(),
+      feedId,
+      isRead: false,
+      isShowing: false,
+    },
+  }));
 
 /**
  * @param {Event} event
@@ -56,16 +76,25 @@ export const handleSubmit = (event, state, validator, httpClient) => {
     })
 
     .then((response) => {
-      const requestUrl = response.config.url;
-      const originalUrl = requestUrl
-        .replace(allOriginsHexlet, '');
       const { data: { contents } } = response;
 
       const id = _.uniqueId();
-      const { newFeed, newPosts } = parse(contents, originalUrl, id);
+
+      const {
+        title, description, items,
+      } = parse(contents);
+
+      const newFeed = {
+        id, rssLink, title, description,
+      };
+
+      console.log('newFeed', newFeed);
+
+      const newPosts = processPosts(items, id);
+
+      console.log('newPosts', newPosts);
 
       state.feeds = [newFeed, ...feeds];
-
       state.posts = [...newPosts, ...posts];
 
       rssForm.processingState = 'processed';
@@ -73,7 +102,7 @@ export const handleSubmit = (event, state, validator, httpClient) => {
     })
 
     .catch((err) => {
-      console.log('err', err);
+      console.log('err', err); // remove
 
       if (err.name === 'ValidationError') {
         rssForm.uiValid = false;
@@ -99,36 +128,34 @@ export const handleSubmit = (event, state, validator, httpClient) => {
  * @param {Object} httpClient
  * @param {number} interval
  */
-export const getUpdates = (state, httpClient, interval) => {
+export const getNewPosts = (state, httpClient, interval) => {
   const { feeds, posts } = state;
-  if (feeds.length > 0) {
-    const promises = feeds.map(({ id, rssLink }) => {
-      const route = getRoute(allOriginsHexlet, rssLink);
-      return httpClient
-        .get(route)
-        .then(({ data: { contents } }) => {
-          const existingPostsLinks = posts
-            .filter((post) => post.feedId === id)
-            .map((post) => post.link);
 
-          const { newPosts } = parse(contents, rssLink, id);
-          const filteredPosts = newPosts
-            .filter(({ link }) => !existingPostsLinks.includes(link));
+  const promises = feeds.map(({ id, rssLink }) => {
+    const route = getRoute(allOriginsHexlet, rssLink);
+    return httpClient
+      .get(route)
+      .then(({ data: { contents } }) => {
+        const existingPostsLinks = posts
+          .filter((post) => post.feedId === id)
+          .map((post) => post.link);
 
-          if (filteredPosts.length === 0) {
-            console.log('no new');
-            return;
-          }
-          console.log(`got ${filteredPosts.length} new posts`);
-          state.posts = [...filteredPosts, ...posts];
-        })
-        .catch(console.log);
-    });
+        const { items } = parse(contents);
+        const filteredPosts = items
+          .filter(({ link }) => !existingPostsLinks.includes(link));
 
-    Promise.all(promises);
-  }
+        if (filteredPosts.length === 0) {
+          return;
+        }
+        const newPosts = processPosts(filteredPosts, id);
+        state.posts = [...newPosts, ...posts];
+      })
+      .catch(console.log); // add error handling
+  });
 
-  setTimeout(() => { getUpdates(state, httpClient, interval); }, interval);
+  Promise.all(promises);
+
+  setTimeout(() => { getNewPosts(state, httpClient, interval); }, interval);
 };
 
 export const handlePostsClick = (event, state) => {
