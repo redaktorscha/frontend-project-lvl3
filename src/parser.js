@@ -15,46 +15,35 @@ const getTextContent = (element) => element.textContent.trim();
 
 /**
  * @param {string} xmlString
- * @param {string} rssLink
- * @param {string} feedId
  * @returns {Object}
  */
-export default (xmlString, rssLink, feedId) => {
+export default (xmlString) => {
   const parser = new DOMParser();
   const document = parser.parseFromString(xmlString, 'text/xml');
   if (!_.isNull(document.querySelector('parsererror'))) {
     throw new ParsingError('failed to parse');
   }
 
-  const feedTitle = document.querySelector('channel > title');
-  const feedDescription = document.querySelector('channel > description');
-  const postElements = document.querySelectorAll('item');
-  const posts = Array
-    .from(postElements)
-    .map((postElement) => {
-      const postId = _.uniqueId();
-      const postTitle = postElement.querySelector('title');
-      const link = postElement.querySelector('link');
-      const postDescription = postElement.querySelector('description');
+  const documentTitle = document.querySelector('channel > title');
+  const documentDescription = document.querySelector('channel > description');
+  const documentElements = document.querySelectorAll('item');
+  const items = Array
+    .from(documentElements)
+    .map((element) => {
+      const itemTitle = element.querySelector('title');
+      const itemLink = element.querySelector('link');
+      const itemDescription = element.querySelector('description');
 
       return {
-        id: postId,
-        feedId,
-        title: getTextContent(postTitle),
-        description: getTextContent(postDescription),
-        link: getTextContent(link),
-        isRead: false,
-        isShowing: false,
+        title: getTextContent(itemTitle),
+        description: getTextContent(itemDescription),
+        link: getTextContent(itemLink),
       };
     });
 
   return {
-    newFeed: {
-      id: feedId,
-      rssLink,
-      title: getTextContent(feedTitle),
-      description: getTextContent(feedDescription),
-    },
-    newPosts: posts,
+    title: getTextContent(documentTitle),
+    description: getTextContent(documentDescription),
+    items,
   };
 };
