@@ -11,18 +11,18 @@ const render = (path, value, prevValue, translator, elements) => {
     form,
     inputElement,
     btnSubmit,
-    pElement,
-    bottomContainer,
-    ulElementFeeds,
-    ulElementPosts,
+    feedbackField,
+    rssContainer,
+    feedsList,
+    postsList,
     modalHeading,
     modalBody,
     btnReadMore,
   } = elements;
 
   if (path === 'feeds') {
-    bottomContainer.classList.remove('d-none');
-    ulElementFeeds.innerHTML = '';
+    rssContainer.classList.remove('d-none');
+    feedsList.innerHTML = '';
     const feeds = [...value].map((feed) => {
       const liElement = document.createElement('li');
       liElement.classList.add('list-group-item', 'border-0');
@@ -35,12 +35,11 @@ const render = (path, value, prevValue, translator, elements) => {
       liElement.append(feedHeading, feedDescription);
       return liElement;
     });
-    ulElementFeeds.append(...feeds);
+    feedsList.append(...feeds);
   }
 
   if (path === 'posts') {
-    console.log('change posts');
-    ulElementPosts.innerHTML = '';
+    postsList.innerHTML = '';
     const posts = [...value].map((post) => {
       const liElement = document.createElement('li');
       liElement.classList
@@ -68,14 +67,14 @@ const render = (path, value, prevValue, translator, elements) => {
       liElement.append(postLink, postButton);
       return liElement;
     });
-    ulElementPosts.append(...posts);
+    postsList.append(...posts);
   }
 
   if (path === 'rssForm.uiValid') {
     inputElement.classList.toggle('is-invalid');
     if (!value) {
-      pElement.classList.remove('text-success');
-      pElement.classList.add('text-danger');
+      feedbackField.classList.remove('text-success');
+      feedbackField.classList.add('text-danger');
     }
   }
 
@@ -86,15 +85,15 @@ const render = (path, value, prevValue, translator, elements) => {
         break;
       case 'processed':
         btnSubmit.removeAttribute('disabled');
-        pElement.classList.remove('text-danger');
-        pElement.classList.add('text-success');
+        feedbackField.classList.remove('text-danger');
+        feedbackField.classList.add('text-success');
         form.reset();
         inputElement.focus();
         break;
       case 'failed':
         btnSubmit.removeAttribute('disabled');
-        pElement.classList.remove('text-success');
-        pElement.classList.add('text-danger');
+        feedbackField.classList.remove('text-success');
+        feedbackField.classList.add('text-danger');
         break;
 
       default:
@@ -103,7 +102,7 @@ const render = (path, value, prevValue, translator, elements) => {
   }
 
   if (path === 'rssForm.feedback' && value !== prevValue) {
-    pElement.textContent = translator.t(value);
+    feedbackField.textContent = translator.t(value);
   }
 };
 
