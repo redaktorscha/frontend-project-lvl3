@@ -5,7 +5,7 @@ import * as yup from 'yup';
 import axios from 'axios';
 import resources from './locales/index.js';
 import render from './view.js';
-import { handleSubmit, getUpdates, handlePostsClick } from './controllers.js';
+import { handleSubmit, getNewPosts, handlePostsClick } from './controllers.js';
 
 const msInterval = 5000;
 
@@ -39,49 +39,40 @@ export default async () => {
     debug: false,
     resources,
   }).then(() => {
-    const form = document.querySelector('form');
-    const inputElement = document.querySelector('input[data-input="rss"]');
-    const btnSubmit = document.querySelector('button[type="submit"]');
-    const pElement = document.querySelector('p[data-element="feedback"]');
-    const bottomContainer = document.querySelector('section[data-element="container-bottom"]');
-    const ulElementFeeds = document.querySelector('ul[data-element="feeds"]');
-    const ulElementPosts = document.querySelector('ul[data-element="posts"]');
-    const modalHeading = document.querySelector('h5.modal-title');
-    const modalBody = document.querySelector('div.modal-body');
-    const btnReadMore = document.querySelector('.modal-footer > a.btn.btn-primary');
-
     /**
  * @type {Object}
  * @property {HTMLFormElement} form
  * @property {HTMLInputElement} inputElement
  * @property {HTMLButtonElement} btnSubmit
- * @property {HTMLParagraphElement} pElement
- * @property {HTMLElement} bottomContainer
- * @property {HTMLUListElement} ulElementFeeds
- * @property {HTMLUListElement} ulElementPosts
+ * @property {HTMLParagraphElement} feedbackField
+ * @property {HTMLElement} rssContainer
+ * @property {HTMLUListElement} feedsList
+ * @property {HTMLUListElement} postsList
  * @property {HTMLHeadingElement} modalHeading
  * @property {HTMLDivElement} modalBody
  * @property {HTMLButtonElement} btnReadMore
  *
  */
     const htmlElements = {
-      form,
-      inputElement,
-      btnSubmit,
-      pElement,
-      bottomContainer,
-      ulElementFeeds,
-      ulElementPosts,
-      modalHeading,
-      modalBody,
-      btnReadMore,
+      form: document.querySelector('form'),
+      inputElement: document.querySelector('input[data-input="rss"]'),
+      btnSubmit: document.querySelector('button[type="submit"]'),
+      feedbackField: document.querySelector('p[data-element="feedback"]'),
+      rssContainer: document.querySelector('section[data-element="container-bottom"]'),
+      feedsList: document.querySelector('ul[data-element="feeds"]'),
+      postsList: document.querySelector('ul[data-element="posts"]'),
+      modalHeading: document.querySelector('h5.modal-title'),
+      modalBody: document.querySelector('div.modal-body'),
+      btnReadMore: document.querySelector('.modal-footer > a.btn.btn-primary'),
     };
     const watchedState = onChange(initState, (path, value, prevValue) => {
       render(path, value, prevValue, i18nextInstance, htmlElements);
     });
 
+    const { form, postsList } = htmlElements;
+
     setTimeout(() => {
-      getUpdates(watchedState, axios, msInterval);
+      getNewPosts(watchedState, axios, msInterval);
     }, msInterval);
 
     form.addEventListener(
@@ -89,7 +80,7 @@ export default async () => {
       (/** @type {Event} */ e) => handleSubmit(e, watchedState, yup, axios),
     );
 
-    ulElementPosts
+    postsList
       .addEventListener('click', (/** @type {Event} */ e) => handlePostsClick(e, watchedState));
   }).catch((error) => console.log(`loading error: ${error.stack}`));
 };
