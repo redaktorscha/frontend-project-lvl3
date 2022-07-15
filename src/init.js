@@ -82,5 +82,5 @@ export default async () => {
 
     postsList
       .addEventListener('click', (/** @type {Event} */ e) => handlePostsClick(e, watchedState));
-  }).catch((error) => console.log(`loading error: ${error.stack}`));
+  }).catch((error) => { throw new Error(error.stack); });
 };

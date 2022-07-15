@@ -88,11 +88,7 @@ export const handleSubmit = (event, state, validator, httpClient) => {
         id, rssLink, title, description,
       };
 
-      console.log('newFeed', newFeed);
-
       const newPosts = processPosts(items, id);
-
-      console.log('newPosts', newPosts);
 
       state.feeds = [newFeed, ...feeds];
       state.posts = [...newPosts, ...posts];
@@ -102,8 +98,6 @@ export const handleSubmit = (event, state, validator, httpClient) => {
     })
 
     .catch((err) => {
-      console.log('err', err); // remove
-
       if (err.name === 'ValidationError') {
         rssForm.uiValid = false;
         const [currentError] = err.errors;
@@ -117,7 +111,6 @@ export const handleSubmit = (event, state, validator, httpClient) => {
       } else {
         rssForm.processingState = 'failed';
         rssForm.feedback = 'network.fail';
-        console.log(`Unknown error: ${err.message}`);
       }
     });
 };
@@ -129,7 +122,9 @@ export const handleSubmit = (event, state, validator, httpClient) => {
  * @param {number} interval
  */
 export const getNewPosts = (state, httpClient, interval) => {
-  const { feeds, posts } = state;
+  const {
+    feeds, posts, rssForm,
+  } = state;
 
   const promises = feeds.map(({ id, rssLink }) => {
     const route = getRoute(allOriginsHexlet, rssLink);
@@ -150,7 +145,18 @@ export const getNewPosts = (state, httpClient, interval) => {
         const newPosts = processPosts(filteredPosts, id);
         state.posts = [...newPosts, ...posts];
       })
-      .catch(console.log); // add error handling
+      .catch((err) => {
+        if (err.name === 'AxiosError') {
+          rssForm.processingState = 'failed';
+          rssForm.feedback = 'network.fail';
+        } else if (err.name === 'ParsingError') {
+          rssForm.processingState = 'failed';
+          rssForm.feedback = 'parsing.fail';
+        } else {
+          rssForm.processingState = 'failed';
+          rssForm.feedback = 'network.fail';
+        }
+      });
   });
 
   Promise.all(promises);
