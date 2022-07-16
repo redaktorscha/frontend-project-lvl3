@@ -14,10 +14,14 @@ export default async () => {
     feeds: [],
     posts: [],
     rssForm: {
-      uiValid: true,
+      valid: true,
       processingState: null,
       feedback: null,
     },
+    ui: {
+      seenPosts: new Set(),
+    },
+    currentPostId: null,
   };
 
   const defaultLanguage = 'ru';
@@ -66,7 +70,7 @@ export default async () => {
       btnReadMore: document.querySelector('.modal-footer > a.btn.btn-primary'),
     };
     const watchedState = onChange(initState, (path, value, prevValue) => {
-      render(path, value, prevValue, i18nextInstance, htmlElements);
+      render(path, value, prevValue, i18nextInstance, htmlElements, watchedState);
     });
 
     const { form, postsList } = htmlElements;

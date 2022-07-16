@@ -5,8 +5,9 @@
  * @param {*} prevValue
  * @param {Object} translator
  * @param {Object} elements
+ * @param {Object} state
  */
-const render = (path, value, prevValue, translator, elements) => {
+const render = (path, value, prevValue, translator, elements, state) => {
   const {
     form,
     inputElement,
@@ -39,27 +40,27 @@ const render = (path, value, prevValue, translator, elements) => {
   }
 
   if (path === 'posts') {
+    const { ui: { seenPosts } } = state;
     postsList.innerHTML = '';
-    const posts = [...value].map((post) => {
+    const posts = [...value].map(({
+      title, id, link,
+    }) => {
       const liElement = document.createElement('li');
       liElement.classList
         .add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
       const postLink = document.createElement('a');
-      postLink.setAttribute('href', post.link);
+      postLink.setAttribute('href', link);
       postLink.setAttribute('target', '_blank');
-      if (post.isRead) {
+
+      if (seenPosts.has(id)) {
         postLink.classList.add('fw-normal', 'text-dark');
       } else {
         postLink.classList.add('fw-bold');
       }
-      if (post.isShowing) {
-        modalHeading.textContent = post.title;
-        modalBody.textContent = post.description;
-        btnReadMore.setAttribute('href', post.link);
-      }
-      postLink.textContent = post.title;
+
+      postLink.textContent = title;
       const postButton = document.createElement('button');
-      postButton.dataset.postId = post.id;
+      postButton.dataset.postId = id;
       postButton.dataset.bsToggle = 'modal';
       postButton.dataset.bsTarget = '#modal';
       postButton.classList.add('btn', 'btn-primary');
@@ -70,7 +71,23 @@ const render = (path, value, prevValue, translator, elements) => {
     postsList.append(...posts);
   }
 
-  if (path === 'rssForm.uiValid') {
+  if (path === 'currentPostId' && value !== prevValue) {
+    const { posts } = state;
+    const selector = `button[data-post-id="${value}"]`;
+    const linkElement = postsList.querySelector(selector).previousElementSibling;
+    linkElement.classList.remove('fw-bold');
+    linkElement.classList.add('fw-normal', 'text-dark');
+
+    const [currentPost] = posts.filter(({ id }) => id === value);
+    const {
+      title, description, link,
+    } = currentPost;
+    modalHeading.textContent = title;
+    modalBody.textContent = description;
+    btnReadMore.setAttribute('href', link);
+  }
+
+  if (path === 'rssForm.valid') {
     inputElement.classList.toggle('is-invalid');
     if (!value) {
       feedbackField.classList.remove('text-success');

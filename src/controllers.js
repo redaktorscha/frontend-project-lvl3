@@ -5,17 +5,6 @@ import parse from './parser.js';
 const allOriginsHexlet = 'https://allorigins.hexlet.app/get?disableCache=true';
 
 /**
- *
- * @param {Array<Object>} posts
- * @param {string} postId
- * @returns {Object}
- */
-const getCurrentPost = (posts, postId) => {
-  const [currentPost] = posts.filter(({ id }) => id === postId);
-  return currentPost;
-};
-
-/**
  * @param {string} allOrigins
  * @param {string} url
  * @returns {string}
@@ -37,8 +26,6 @@ const processPosts = (posts, feedId) => posts
     ...{
       id: _.uniqueId(),
       feedId,
-      isRead: false,
-      isShowing: false,
     },
   }));
 
@@ -68,7 +55,7 @@ export const handleSubmit = (event, state, validator, httpClient) => {
 
   schema.validate(rssLink)
     .then((checkedUrl) => {
-      rssForm.uiValid = true;
+      rssForm.valid = true;
       rssForm.processingState = 'sending';
 
       const route = getRoute(allOriginsHexlet, checkedUrl);
@@ -99,7 +86,7 @@ export const handleSubmit = (event, state, validator, httpClient) => {
 
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        rssForm.uiValid = false;
+        rssForm.valid = false;
         const [currentError] = err.errors;
         rssForm.feedback = `validation.${currentError}`;
       } else if (err.name === 'AxiosError') {
@@ -170,27 +157,15 @@ export const handlePostsClick = (event, state) => {
     return;
   }
 
-  const { posts } = state;
-  let previousPost;
-  let currentPost;
+  const { ui } = state;
+  const { seenPosts } = ui;
+  let postId;
   if (targetElement.tagName === 'BUTTON') {
-    [previousPost] = posts.filter(({ isShowing }) => isShowing);
-    if (previousPost) {
-      previousPost.isShowing = false;
-    }
-    const { postId } = targetElement.dataset;
-    currentPost = getCurrentPost(posts, postId);
-    currentPost.isShowing = true;
-    currentPost.isRead = true;
+    postId = targetElement.dataset.postId;
   } else {
-    const { postId } = targetElement.nextElementSibling.dataset;
-    currentPost = getCurrentPost(posts, postId);
-    currentPost.isRead = true;
+    postId = targetElement.nextElementSibling.dataset.postId;
   }
 
-  state.posts.forEach(({ id }, arr, i) => {
-    if (id === currentPost.id) {
-      state.posts[i] = currentPost;
-    }
-  });
+  seenPosts.add(postId);
+  state.currentPostId = postId;
 };
