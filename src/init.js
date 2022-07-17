@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import _ from 'lodash';
 import onChange from 'on-change';
 import i18n from 'i18next';
