@@ -114,9 +114,7 @@ export const handleSubmit = (event, state) => {
  * @param {number} interval
  */
 export const getNewPosts = (state, interval) => {
-  const {
-    feeds, posts, rssForm,
-  } = state;
+  const { feeds, posts } = state;
 
   const promises = feeds.map(({ id, rssLink }) => {
     const route = getRoute(allOriginsHexlet, rssLink);
@@ -136,18 +134,6 @@ export const getNewPosts = (state, interval) => {
         }
         const newPosts = processPosts(filteredPosts, id);
         state.posts = [...newPosts, ...posts];
-      })
-      .catch((err) => {
-        if (err.name === 'AxiosError') {
-          rssForm.processingState = 'failed';
-          rssForm.feedback = 'network.fail';
-        } else if (err.name === 'ParsingError') {
-          rssForm.processingState = 'failed';
-          rssForm.feedback = 'parsing.fail';
-        } else {
-          rssForm.processingState = 'failed';
-          rssForm.feedback = 'network.fail';
-        }
       });
   });
 
@@ -194,12 +180,11 @@ export default async () => {
 
   yup.setLocale({
     mixed: {
-      default: 'something went wrong',
-      notOneOf: 'exists',
-      required: 'empty',
+      notOneOf: 'yup_notOneOf',
+      required: 'yup_required',
     },
     string: {
-      url: 'invalid',
+      url: 'yup_url',
     },
   });
 
