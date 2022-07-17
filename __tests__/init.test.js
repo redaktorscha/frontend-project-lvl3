@@ -171,7 +171,7 @@ describe('invalid, empty or existing input value', () => {
     const user = userEvent.setup();
     await user.type(formInput, urlInvalid);
     await user.click(btnSubmit);
-    expect(await screen.findByText(localeRu.translation.validation.yup_url)).toBeVisible();
+    expect(await screen.findByText(localeRu.translation.validation.url)).toBeVisible();
     expect(await formInput.classList.contains('is-invalid')).toBe(true);
   });
 
@@ -179,7 +179,7 @@ describe('invalid, empty or existing input value', () => {
     const { btnSubmit, feedbackField } = htmlElements;
     const user = userEvent.setup();
     await user.click(btnSubmit);
-    expect(await screen.findByText(localeRu.translation.validation.yup_required)).toBeVisible();
+    expect(await screen.findByText(localeRu.translation.validation.required)).toBeVisible();
     expect(await feedbackField.classList.contains('text-danger')).toBe(true);
   });
 
@@ -204,7 +204,7 @@ describe('invalid, empty or existing input value', () => {
     formInput.value = '';
     await user.type(formInput, urlRssValid);
     await user.click(btnSubmit);
-    expect(await screen.findByText(localeRu.translation.validation.yup_notOneOf)).toBeVisible();
+    expect(await screen.findByText(localeRu.translation.validation.notOneOf)).toBeVisible();
     expect(await feedbackField.classList.contains('text-danger')).toBe(true);
   }, 30000);
 });

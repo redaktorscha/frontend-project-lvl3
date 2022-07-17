@@ -180,11 +180,11 @@ export default async () => {
 
   yup.setLocale({
     mixed: {
-      notOneOf: 'yup_notOneOf',
-      required: 'yup_required',
+      notOneOf: 'notOneOf',
+      required: 'required',
     },
     string: {
-      url: 'yup_url',
+      url: 'url',
     },
   });
 

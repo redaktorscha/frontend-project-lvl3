@@ -1,9 +1,9 @@
 export default {
   translation: {
     validation: {
-      yup_notOneOf: 'RSS already exists',
-      yup_required: 'Should not be empty',
-      yup_url: 'RSS should be a valid URL',
+      notOneOf: 'RSS already exists',
+      required: 'Should not be empty',
+      url: 'RSS should be a valid URL',
     },
     parsing: {
       fail: 'Resource does not contain a valid RSS',
