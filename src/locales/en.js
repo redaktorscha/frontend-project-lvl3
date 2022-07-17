@@ -1,6 +1,7 @@
 export default {
   translation: {
     validation: {
+      default: 'Something went wrong',
       exists: 'RSS already exists',
       empty: 'Should not be empty',
       invalid: 'RSS should be a valid URL',
