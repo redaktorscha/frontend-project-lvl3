@@ -65,7 +65,6 @@ export const handleSubmit = (event, state) => {
       rssForm.processingState = 'sending';
 
       const route = getRoute(proxyUrl, checkedUrl);
-      console.log('route', route);
       return axios.get(route);
     })
 

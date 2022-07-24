@@ -78,7 +78,7 @@ const render = (path, value, prevValue, translator, elements, state) => {
     linkElement.classList.remove('fw-bold');
     linkElement.classList.add('fw-normal', 'text-dark');
 
-    const [currentPost] = posts.filter(({ id }) => id === value);
+    const currentPost = posts.find(({ id }) => id === value);
     const {
       title, description, link,
     } = currentPost;
