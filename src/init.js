@@ -9,15 +9,15 @@ import render from './view.js';
 
 const msInterval = 5000;
 
-const proxyUrl = 'https://allorigins.hexlet.app/get';
+const proxyUrl = 'https://allorigins.hexlet.app';
 
 /**
- * @param {string} proxy
+ * @param {string} proxyBase
  * @param {string} url
  * @returns {string}
  */
-export const getRoute = (proxy, url) => {
-  const route = new URL(proxy);
+export const getRoute = (proxyBase, url) => {
+  const route = new URL('/get', proxyBase);
   route.searchParams.append('disableCache', 'true');
   route.searchParams.append('url', url);
   return route.href;
