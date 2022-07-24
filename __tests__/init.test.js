@@ -18,7 +18,7 @@ axios.defaults.adapter = httpAdapter;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const allOriginsTest = 'https://allorigins.hexlet.app/';
+const proxyUrl = 'https://allorigins.hexlet.app/';
 
 /**
  * @param {string} filename
@@ -53,7 +53,7 @@ beforeAll(async () => {
   testData.htmlString = await readFixture('index');
   testData.xmlStringValid = await readFixture('xml-valid');
   nock.disableNetConnect();
-  nock(allOriginsTest)
+  nock(proxyUrl)
     .persist()
 
     .get('/get')

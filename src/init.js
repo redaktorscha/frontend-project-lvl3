@@ -9,17 +9,18 @@ import render from './view.js';
 
 const msInterval = 5000;
 
-const allOriginsHexlet = 'https://allorigins.hexlet.app/get?disableCache=true';
+const proxyUrl = 'https://allorigins.hexlet.app/get';
 
 /**
- * @param {string} allOrigins
+ * @param {string} proxy
  * @param {string} url
  * @returns {string}
  */
-export const getRoute = (allOrigins, url) => {
-  const allOriginsUrl = new URL(allOrigins);
-  allOriginsUrl.searchParams.append('url', url);
-  return allOriginsUrl.href;
+export const getRoute = (proxy, url) => {
+  const route = new URL(proxy);
+  route.searchParams.append('disableCache', 'true');
+  route.searchParams.append('url', url);
+  return route.href;
 };
 
 /**
@@ -63,7 +64,8 @@ export const handleSubmit = (event, state) => {
       rssForm.valid = true;
       rssForm.processingState = 'sending';
 
-      const route = getRoute(allOriginsHexlet, checkedUrl);
+      const route = getRoute(proxyUrl, checkedUrl);
+      console.log('route', route);
       return axios.get(route);
     })
 
@@ -116,7 +118,7 @@ export const getNewPosts = (state, interval) => {
   const { feeds, posts } = state;
 
   const promises = feeds.map(({ id, rssLink }) => {
-    const route = getRoute(allOriginsHexlet, rssLink);
+    const route = getRoute(proxyUrl, rssLink);
     return axios
       .get(route)
       .then(({ data: { contents } }) => {
