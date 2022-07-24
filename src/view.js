@@ -3,11 +3,11 @@
  * @param {string} path
  * @param {*} value
  * @param {*} prevValue
- * @param {Object} translator
+ * @param {Object} i18next
  * @param {Object} elements
  * @param {Object} state
  */
-const render = (path, value, prevValue, translator, elements, state) => {
+const render = (path, value, prevValue, i18next, elements, state) => {
   const {
     form,
     inputElement,
@@ -64,7 +64,7 @@ const render = (path, value, prevValue, translator, elements, state) => {
       postButton.dataset.bsToggle = 'modal';
       postButton.dataset.bsTarget = '#modal';
       postButton.classList.add('btn', 'btn-primary');
-      postButton.textContent = translator.t('ui.btnRead');
+      postButton.textContent = i18next.t('ui.btnRead');
       liElement.append(postLink, postButton);
       return liElement;
     });
@@ -119,7 +119,7 @@ const render = (path, value, prevValue, translator, elements, state) => {
   }
 
   if (path === 'rssForm.feedback' && value !== prevValue) {
-    feedbackField.textContent = translator.t(value);
+    feedbackField.textContent = i18next.t(value);
   }
 };
 

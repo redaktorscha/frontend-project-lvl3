@@ -151,10 +151,10 @@ export const handlePostsClick = (event, state) => {
   const { ui } = state;
   const { seenPosts } = ui;
   let postId;
-  if (targetElement.tagName === 'BUTTON') {
-    postId = targetElement.dataset.postId;
-  } else {
+  if (_.isNull(targetElement.getAttribute('data-post-id'))) {
     postId = targetElement.nextElementSibling.dataset.postId;
+  } else {
+    postId = targetElement.dataset.postId;
   }
 
   seenPosts.add(postId);
