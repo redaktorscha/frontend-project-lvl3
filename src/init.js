@@ -12,6 +12,15 @@ const msInterval = 5000;
 const proxyUrl = 'https://allorigins.hexlet.app';
 
 /**
+ * @param {HTMLFormElement} form
+ * @returns {string}
+ */
+const getRssLink = (form) => {
+  const formData = new FormData(form);
+  return String(formData.get('rss-link'));
+};
+
+/**
  * @param {string} proxyBase
  * @param {string} url
  * @returns {string}
@@ -38,74 +47,93 @@ const processPosts = (posts, feedId) => posts
   }));
 
 /**
- * @param {Event} event
- * @param {Object} state
+ * @param {string} newLink
+ * @param {Array<string>} oldLinks
+ * @returns {Promise}
  */
-export const handleSubmit = (event, state) => {
-  event.preventDefault();
-  const form = /** @type {HTMLFormElement} */(event.target);
-  const formData = new FormData(form);
-  const rssLink = String(formData.get('rss-link'));
+const validateUrl = (newLink, oldLinks) => {
+  const schema = yup.string()
+    .trim()
+    .required()
+    .url()
+    .notOneOf(oldLinks);
+
+  return schema
+    .validate(newLink);
+};
+
+const handleSuccessfulValidation = (url, state) => {
+  const { rssForm } = state;
+  rssForm.valid = true;
+  rssForm.processingState = 'sending';
+
+  const route = getRoute(proxyUrl, url);
+  return axios.get(route);
+};
+
+const handleSuccessfulHttpResponse = (response, state, rssLink) => {
+  const { data: { contents } } = response;
 
   const {
     feeds, posts, rssForm,
   } = state;
 
+  const id = _.uniqueId();
+
+  const {
+    title, description, items,
+  } = parse(contents);
+
+  const newFeed = {
+    id, rssLink, title, description,
+  };
+
+  const newPosts = processPosts(items, id);
+
+  state.feeds = [newFeed, ...feeds];
+  state.posts = [...newPosts, ...posts];
+
+  rssForm.processingState = 'processed';
+  rssForm.feedback = 'network.success';
+};
+
+const handleError = (err, state) => {
+  const { rssForm } = state;
+  if (err.name === 'ValidationError') {
+    rssForm.valid = false;
+    const [currentError] = err.errors;
+    rssForm.feedback = `validation.${currentError}`;
+  } else if (err.name === 'AxiosError') {
+    rssForm.processingState = 'failed';
+    rssForm.feedback = 'network.fail';
+  } else if (err.name === 'ParsingError') {
+    rssForm.processingState = 'failed';
+    rssForm.feedback = 'parsing.fail';
+  } else {
+    rssForm.processingState = 'failed';
+    rssForm.feedback = 'default.fail';
+  }
+};
+
+/**
+ * @param {Event} event
+ * @param {Object} state
+ */
+export const handleSubmit = (event, state) => {
+  event.preventDefault();
+
+  const rssLink = getRssLink(/** @type {HTMLFormElement} */(event.target));
+
+  const { feeds } = state;
+
   const existingFeedsLinks = feeds.map((feed) => feed.rssLink);
 
-  const schema = yup.string()
-    .trim()
-    .required()
-    .url()
-    .notOneOf(existingFeedsLinks);
+  validateUrl(rssLink, existingFeedsLinks)
+    .then((checkedUrl) => handleSuccessfulValidation(checkedUrl, state))
 
-  schema.validate(rssLink)
-    .then((checkedUrl) => {
-      rssForm.valid = true;
-      rssForm.processingState = 'sending';
+    .then((response) => handleSuccessfulHttpResponse(response, state, rssLink))
 
-      const route = getRoute(proxyUrl, checkedUrl);
-      return axios.get(route);
-    })
-
-    .then((response) => {
-      const { data: { contents } } = response;
-
-      const id = _.uniqueId();
-
-      const {
-        title, description, items,
-      } = parse(contents);
-
-      const newFeed = {
-        id, rssLink, title, description,
-      };
-
-      const newPosts = processPosts(items, id);
-
-      state.feeds = [newFeed, ...feeds];
-      state.posts = [...newPosts, ...posts];
-
-      rssForm.processingState = 'processed';
-      rssForm.feedback = 'network.success';
-    })
-
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        rssForm.valid = false;
-        const [currentError] = err.errors;
-        rssForm.feedback = `validation.${currentError}`;
-      } else if (err.name === 'AxiosError') {
-        rssForm.processingState = 'failed';
-        rssForm.feedback = 'network.fail';
-      } else if (err.name === 'ParsingError') {
-        rssForm.processingState = 'failed';
-        rssForm.feedback = 'parsing.fail';
-      } else {
-        rssForm.processingState = 'failed';
-        rssForm.feedback = 'network.fail';
-      }
-    });
+    .catch((err) => handleError(err, state));
 };
 
 /**
