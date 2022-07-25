@@ -12,9 +12,6 @@ export default {
       success: 'RSS loaded successfully',
       fail: 'Network error',
     },
-    default: {
-      fail: 'Something went wrong',
-    },
     ui: {
       btnRead: 'View',
     },

@@ -12,9 +12,6 @@ export default {
       success: 'RSS успешно загружен',
       fail: 'Ошибка сети',
     },
-    default: {
-      fail: 'Что-то пошло не так',
-    },
     ui: {
       btnRead: 'Просмотр',
     },

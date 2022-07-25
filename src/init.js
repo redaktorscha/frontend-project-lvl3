@@ -51,7 +51,7 @@ const processPosts = (posts, feedId) => posts
  * @param {Array<string>} oldLinks
  * @returns {Promise}
  */
-const validateUrl = (newLink, oldLinks) => {
+const validateUrl = (newLink, oldLinks, state) => {
   const schema = yup.string()
     .trim()
     .required()
@@ -59,7 +59,16 @@ const validateUrl = (newLink, oldLinks) => {
     .notOneOf(oldLinks);
 
   return schema
-    .validate(newLink);
+    .validate(newLink)
+    .catch((err) => {
+      const { rssForm } = state;
+      if (err.name === 'ValidationError') {
+        rssForm.valid = false;
+        const [currentError] = err.errors;
+        rssForm.feedback = `validation.${currentError}`;
+      }
+      throw err;
+    });
 };
 
 const handleSuccessfulValidation = (url, state) => {
@@ -99,19 +108,11 @@ const handleSuccessfulHttpResponse = (response, state, rssLink) => {
 
 const handleError = (err, state) => {
   const { rssForm } = state;
-  if (err.name === 'ValidationError') {
-    rssForm.valid = false;
-    const [currentError] = err.errors;
-    rssForm.feedback = `validation.${currentError}`;
-  } else if (err.name === 'AxiosError') {
-    rssForm.processingState = 'failed';
+  rssForm.processingState = 'failed';
+  if (err.name === 'AxiosError') {
     rssForm.feedback = 'network.fail';
   } else if (err.name === 'ParsingError') {
-    rssForm.processingState = 'failed';
     rssForm.feedback = 'parsing.fail';
-  } else {
-    rssForm.processingState = 'failed';
-    rssForm.feedback = 'default.fail';
   }
 };
 
@@ -128,7 +129,7 @@ export const handleSubmit = (event, state) => {
 
   const existingFeedsLinks = feeds.map((feed) => feed.rssLink);
 
-  validateUrl(rssLink, existingFeedsLinks)
+  validateUrl(rssLink, existingFeedsLinks, state)
     .then((checkedUrl) => handleSuccessfulValidation(checkedUrl, state))
 
     .then((response) => handleSuccessfulHttpResponse(response, state, rssLink))
