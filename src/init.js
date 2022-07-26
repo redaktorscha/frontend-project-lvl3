@@ -46,6 +46,12 @@ const processPosts = (posts, feedId) => posts
     },
   }));
 
+/*
+ * @param {string} route
+ * @returns {Promise}
+ */
+const loadRss = (route) => axios.get(route);
+
 /**
  * @param {string} newLink
  * @param {Array<string>} oldLinks
@@ -71,15 +77,25 @@ const validateUrl = (newLink, oldLinks, state) => {
     });
 };
 
+/**
+ * @param {string} url
+ * @param {Object} state
+ * @returns {Promise}
+ */
 const handleSuccessfulValidation = (url, state) => {
   const { rssForm } = state;
   rssForm.valid = true;
   rssForm.processingState = 'sending';
 
   const route = getRoute(proxyUrl, url);
-  return axios.get(route);
+  return loadRss(route);
 };
 
+/**
+ * @param {Object} response
+ * @param {Object} state
+ * @param {string} rssLink
+ */
 const handleSuccessfulHttpResponse = (response, state, rssLink) => {
   const { data: { contents } } = response;
 
@@ -106,9 +122,15 @@ const handleSuccessfulHttpResponse = (response, state, rssLink) => {
   rssForm.feedback = 'network.success';
 };
 
+/**
+ * @param {*} err
+ * @param {*} state
+ */
+
 const handleError = (err, state) => {
   const { rssForm } = state;
   rssForm.processingState = 'failed';
+
   if (err.name === 'AxiosError') {
     rssForm.feedback = 'network.fail';
   } else if (err.name === 'ParsingError') {
