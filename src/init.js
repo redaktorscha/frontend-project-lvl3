@@ -57,7 +57,7 @@ const loadRss = (route) => axios.get(route);
  * @param {Array<string>} oldLinks
  * @returns {Promise}
  */
-const validateUrl = (newLink, oldLinks, state) => {
+const validateUrl = (newLink, oldLinks) => {
   const schema = yup.string()
     .trim()
     .required()
@@ -66,24 +66,23 @@ const validateUrl = (newLink, oldLinks, state) => {
 
   return schema
     .validate(newLink)
-    .catch((err) => {
-      const { rssForm } = state;
-      if (err.name === 'ValidationError') {
-        rssForm.valid = false;
-        const [currentError] = err.errors;
-        rssForm.feedback = `validation.${currentError}`;
-      }
-      throw err;
-    });
+    .then(() => null)
+    .catch((e) => e.message);
 };
 
 /**
+ * @param {null|string} errorMessage
  * @param {string} url
  * @param {Object} state
  * @returns {Promise}
  */
-const handleSuccessfulValidation = (url, state) => {
+const handleValidation = (errorMessage, url, state) => {
   const { rssForm } = state;
+  if (!_.isNull(errorMessage)) {
+    rssForm.valid = false;
+    rssForm.feedback = `validation.${errorMessage}`;
+    return null;
+  }
   rssForm.valid = true;
   rssForm.processingState = 'sending';
 
@@ -93,10 +92,10 @@ const handleSuccessfulValidation = (url, state) => {
 
 /**
  * @param {Object} response
- * @param {Object} state
  * @param {string} rssLink
+ * @param {Object} state
  */
-const handleSuccessfulHttpResponse = (response, state, rssLink) => {
+const handleSuccessfulHttpResponse = (response, rssLink, state) => {
   const { data: { contents } } = response;
 
   const {
@@ -123,8 +122,8 @@ const handleSuccessfulHttpResponse = (response, state, rssLink) => {
 };
 
 /**
- * @param {*} err
- * @param {*} state
+ * @param {Error} err
+ * @param {Object} state
  */
 
 const handleError = (err, state) => {
@@ -151,10 +150,10 @@ export const handleSubmit = (event, state) => {
 
   const existingFeedsLinks = feeds.map((feed) => feed.rssLink);
 
-  validateUrl(rssLink, existingFeedsLinks, state)
-    .then((checkedUrl) => handleSuccessfulValidation(checkedUrl, state))
+  validateUrl(rssLink, existingFeedsLinks)
+    .then((result) => handleValidation(result, rssLink, state))
 
-    .then((response) => handleSuccessfulHttpResponse(response, state, rssLink))
+    .then((response) => handleSuccessfulHttpResponse(response, rssLink, state))
 
     .catch((err) => handleError(err, state));
 };
