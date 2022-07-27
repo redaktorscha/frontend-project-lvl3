@@ -21,7 +21,7 @@ export default (xmlString) => {
   const parser = new DOMParser();
   const document = parser.parseFromString(xmlString, 'text/xml');
   if (!_.isNull(document.querySelector('parsererror'))) {
-    throw new ParsingError('failed to parse');
+    throw new ParsingError('parsing.fail');
   }
 
   const documentTitle = document.querySelector('channel > title');

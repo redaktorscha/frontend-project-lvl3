@@ -46,12 +46,6 @@ const processPosts = (posts, feedId) => posts
     },
   }));
 
-/*
- * @param {string} route
- * @returns {Promise}
- */
-const loadRss = (route) => axios.get(route);
-
 /**
  * @param {string} newLink
  * @param {Array<string>} oldLinks
@@ -71,6 +65,19 @@ const validateUrl = (newLink, oldLinks) => {
 };
 
 /**
+ * @param {string} route
+ * @returns {Promise}
+ */
+const loadRss = (route) => axios.get(route)
+  .then((data) => data)
+  .catch((e) => {
+    if (e.name === 'AxiosError') {
+      return Promise.resolve('network.fail');
+    }
+    return Promise.reject(e.message);
+  });
+
+/**
  * @param {null|string} errorMessage
  * @param {string} url
  * @param {Object} state
@@ -80,12 +87,10 @@ const handleValidation = (errorMessage, url, state) => {
   const { rssForm } = state;
   if (!_.isNull(errorMessage)) {
     rssForm.valid = false;
-    rssForm.feedback = `validation.${errorMessage}`;
-    return null;
+    return Promise.resolve(`validation.${errorMessage}`);
   }
   rssForm.valid = true;
   rssForm.processingState = 'sending';
-
   const route = getRoute(proxyUrl, url);
   return loadRss(route);
 };
@@ -94,19 +99,36 @@ const handleValidation = (errorMessage, url, state) => {
  * @param {Object} response
  * @param {string} rssLink
  * @param {Object} state
+ * @returns {Promise}
  */
-const handleSuccessfulHttpResponse = (response, rssLink, state) => {
-  const { data: { contents } } = response;
-
+const handleHttpResponse = (response, rssLink, state) => {
   const {
     feeds, posts, rssForm,
   } = state;
 
+  if (typeof response === 'string') {
+    rssForm.processingState = 'failed';
+    return Promise.resolve(response);
+  }
+  const { data: { contents } } = response;
+
   const id = _.uniqueId();
+
+  let parsingResult;
+
+  try {
+    parsingResult = parse(contents);
+  } catch (e) {
+    rssForm.processingState = 'failed';
+    if (e.name === 'ParsingError') {
+      return Promise.resolve(e.message);
+    }
+    return Promise.reject(e.message);
+  }
 
   const {
     title, description, items,
-  } = parse(contents);
+  } = parsingResult;
 
   const newFeed = {
     id, rssLink, title, description,
@@ -118,23 +140,25 @@ const handleSuccessfulHttpResponse = (response, rssLink, state) => {
   state.posts = [...newPosts, ...posts];
 
   rssForm.processingState = 'processed';
-  rssForm.feedback = 'network.success';
+  return Promise.resolve('network.success');
 };
 
 /**
- * @param {Error} err
+ * @param {string} message
  * @param {Object} state
  */
-
-const handleError = (err, state) => {
+const handleFeedbackMessage = (message, state) => {
   const { rssForm } = state;
-  rssForm.processingState = 'failed';
+  rssForm.feedback = message;
+};
 
-  if (err.name === 'AxiosError') {
-    rssForm.feedback = 'network.fail';
-  } else if (err.name === 'ParsingError') {
-    rssForm.feedback = 'parsing.fail';
-  }
+/**
+ * @param {string} errorMessage
+ * @param {Object} state
+ */
+const handleUnknownError = (errorMessage, state) => {
+  const { rssForm } = state;
+  rssForm.feedback = errorMessage;
 };
 
 /**
@@ -153,9 +177,11 @@ export const handleSubmit = (event, state) => {
   validateUrl(rssLink, existingFeedsLinks)
     .then((result) => handleValidation(result, rssLink, state))
 
-    .then((response) => handleSuccessfulHttpResponse(response, rssLink, state))
+    .then((response) => handleHttpResponse(response, rssLink, state))
 
-    .catch((err) => handleError(err, state));
+    .then((message) => handleFeedbackMessage(message, state))
+
+    .catch((e) => handleUnknownError(e.message, state));
 };
 
 /**
