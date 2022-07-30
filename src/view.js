@@ -39,6 +39,7 @@ const handlePosts = (data, htmlElements, seenPosts, btnText) => {
     const postLink = document.createElement('a');
     postLink.setAttribute('href', link);
     postLink.setAttribute('target', '_blank');
+    postLink.dataset.postId = id;
 
     if (seenPosts.has(id)) {
       postLink.classList.add('fw-normal', 'text-dark');
@@ -106,7 +107,7 @@ const showFormValidationStatus = (isValid, htmlElements) => {
  * @param {Object} htmlElements
  */
 
-const handleFormStateChange = (formState, htmlElements) => {
+const handleFormStateChange = (formState, htmlElements, message) => {
   const {
     btnSubmit, feedbackField, form, inputElement,
   } = htmlElements;
@@ -118,6 +119,7 @@ const handleFormStateChange = (formState, htmlElements) => {
       btnSubmit.removeAttribute('disabled');
       feedbackField.classList.remove('text-danger');
       feedbackField.classList.add('text-success');
+      feedbackField.textContent = message;
       form.reset();
       inputElement.focus();
       break;
@@ -136,7 +138,7 @@ const handleFormStateChange = (formState, htmlElements) => {
  * @param {string} message
  * @param {Object} htmlElements
  */
-const showFeedbackMessage = (message, htmlElements) => {
+const showErrorFeedbackMessage = (message, htmlElements) => {
   const { feedbackField } = htmlElements;
   feedbackField.textContent = message;
 };
@@ -173,12 +175,16 @@ const render = (path, value, prevValue, i18next, elements, state) => {
   }
 
   if (path === 'rssForm.processingState') {
-    handleFormStateChange(value, elements);
+    let localizedSuccessMessage = null;
+    if (value === 'processed') {
+      localizedSuccessMessage = i18next.t('success');
+    }
+    handleFormStateChange(value, elements, localizedSuccessMessage);
   }
 
   if (path === 'rssForm.feedback' && value !== prevValue) {
-    const localizedMessage = i18next.t(value);
-    showFeedbackMessage(localizedMessage, elements);
+    const localizedErrorMessage = i18next.t(`errors.${value}`);
+    showErrorFeedbackMessage(localizedErrorMessage, elements);
   }
 };
 

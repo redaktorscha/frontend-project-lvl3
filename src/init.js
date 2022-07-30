@@ -12,6 +12,34 @@ const msInterval = 5000;
 const proxyUrl = 'https://allorigins.hexlet.app';
 
 /**
+ * @param {HTMLFormElement} form
+ * @returns {string}
+ */
+const getRssLink = (form) => {
+  const formData = new FormData(form);
+  return String(formData.get('rss-link'));
+};
+
+/**
+ * @param {string} url
+ * @param {Array<Object>} feeds
+ * @returns {Promise}
+ */
+const validateUrl = (url, feeds) => {
+  const feedsUrls = feeds.map((feed) => feed.url);
+  const schema = yup.string()
+    .trim()
+    .required()
+    .url()
+    .notOneOf(feedsUrls);
+
+  return schema
+    .validate(url)
+    .then(() => null)
+    .catch((e) => e.message);
+};
+
+/**
  * @param {string} proxyBase
  * @param {string} url
  * @returns {string}
@@ -37,37 +65,23 @@ const processPosts = (posts, feedId) => posts
     },
   }));
 
-/**
- * @param {Event} event
- * @param {Object} state
- */
-export const handleSubmit = (event, state) => {
-  event.preventDefault();
-  const form = /** @type {HTMLFormElement} */(event.target);
-  const formData = new FormData(form);
-  const rssLink = String(formData.get('rss-link'));
+const getErrorTypeMessage = (error) => {
+  if (error.isAxiosError) {
+    return 'network';
+  }
+  if (error.isParsingError) {
+    return 'noRss';
+  }
+  return 'unknown';
+};
 
+const loadRss = (url, state) => {
   const {
     feeds, posts, rssForm,
   } = state;
-
-  const existingFeedsLinks = feeds.map((feed) => feed.rssLink);
-
-  const schema = yup.string()
-    .trim()
-    .required()
-    .url()
-    .notOneOf(existingFeedsLinks);
-
-  schema.validate(rssLink)
-    .then((checkedUrl) => {
-      rssForm.valid = true;
-      rssForm.processingState = 'sending';
-
-      const route = getRoute(proxyUrl, checkedUrl);
-      return axios.get(route);
-    })
-
+  rssForm.processingState = 'sending';
+  const route = getRoute(proxyUrl, url);
+  return axios.get(route)
     .then((response) => {
       const { data: { contents } } = response;
 
@@ -78,7 +92,7 @@ export const handleSubmit = (event, state) => {
       } = parse(contents);
 
       const newFeed = {
-        id, rssLink, title, description,
+        id, url, title, description,
       };
 
       const newPosts = processPosts(items, id);
@@ -87,23 +101,34 @@ export const handleSubmit = (event, state) => {
       state.posts = [...newPosts, ...posts];
 
       rssForm.processingState = 'processed';
-      rssForm.feedback = 'network.success';
     })
 
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      rssForm.processingState = 'failed';
+      rssForm.feedback = getErrorTypeMessage(err);
+    });
+};
+
+/**
+ * @param {Event} event
+ * @param {Object} state
+ */
+export const handleSubmit = (event, state) => {
+  event.preventDefault();
+  const rssLink = getRssLink(/** @type {HTMLFormElement} */(event.target));
+
+  const { feeds, rssForm } = state;
+
+  validateUrl(rssLink, feeds)
+    .then((errorMessage) => {
+      if (errorMessage) {
         rssForm.valid = false;
-        const [currentError] = err.errors;
-        rssForm.feedback = `validation.${currentError}`;
-      } else if (err.name === 'AxiosError') {
         rssForm.processingState = 'failed';
-        rssForm.feedback = 'network.fail';
-      } else if (err.name === 'ParsingError') {
-        rssForm.processingState = 'failed';
-        rssForm.feedback = 'parsing.fail';
+        rssForm.feedback = errorMessage;
       } else {
-        rssForm.processingState = 'failed';
-        rssForm.feedback = 'network.fail';
+        rssForm.valid = true;
+        rssForm.feedback = null;
+        loadRss(rssLink, state);
       }
     });
 };
@@ -116,8 +141,8 @@ export const handleSubmit = (event, state) => {
 export const getNewPosts = (state, interval) => {
   const { feeds, posts } = state;
 
-  const promises = feeds.map(({ id, rssLink }) => {
-    const route = getRoute(proxyUrl, rssLink);
+  const promises = feeds.map(({ id, url }) => {
+    const route = getRoute(proxyUrl, url);
     return axios
       .get(route)
       .then(({ data: { contents } }) => {
@@ -134,7 +159,8 @@ export const getNewPosts = (state, interval) => {
         }
         const newPosts = processPosts(filteredPosts, id);
         state.posts = [...newPosts, ...posts];
-      });
+      })
+      .catch(console.log);
   });
 
   Promise.all(promises);
@@ -144,18 +170,14 @@ export const getNewPosts = (state, interval) => {
 
 export const handlePostsClick = (event, state) => {
   const targetElement = event.target;
-  if (targetElement.tagName !== 'BUTTON' && targetElement.tagName !== 'A') {
+
+  if (!('postId' in targetElement.dataset)) {
     return;
   }
 
   const { ui } = state;
   const { seenPosts } = ui;
-  let postId;
-  if (_.isNull(targetElement.getAttribute('data-post-id'))) {
-    postId = targetElement.nextElementSibling.dataset.postId;
-  } else {
-    postId = targetElement.dataset.postId;
-  }
+  const { postId } = targetElement.dataset;
 
   seenPosts.add(postId);
   state.currentPostId = postId;
