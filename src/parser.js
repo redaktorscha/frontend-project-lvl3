@@ -3,7 +3,7 @@ import _ from 'lodash';
 class ParsingError extends Error {
   constructor(message) {
     super(message);
-    this.name = 'ParsingError';
+    this.isParsingError = true;
   }
 }
 

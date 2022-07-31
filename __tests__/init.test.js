@@ -105,7 +105,7 @@ describe('submits form successfully', () => {
     const user = userEvent.setup();
     await user.type(formInput, urlRssValid);
     await user.click(btnSubmit);
-    expect(await screen.findByText(localeRu.translation.network.success)).toBeVisible();
+    expect(await screen.findByText(localeRu.translation.success)).toBeVisible();
     expect(await feedbackField.classList.contains('text-success')).toBe(true);
   });
 
@@ -171,7 +171,7 @@ describe('invalid, empty or existing input value', () => {
     const user = userEvent.setup();
     await user.type(formInput, urlInvalid);
     await user.click(btnSubmit);
-    expect(await screen.findByText(localeRu.translation.validation.url)).toBeVisible();
+    expect(await screen.findByText(localeRu.translation.errors.url)).toBeVisible();
     expect(await formInput.classList.contains('is-invalid')).toBe(true);
   });
 
@@ -179,7 +179,7 @@ describe('invalid, empty or existing input value', () => {
     const { btnSubmit, feedbackField } = htmlElements;
     const user = userEvent.setup();
     await user.click(btnSubmit);
-    expect(await screen.findByText(localeRu.translation.validation.required)).toBeVisible();
+    expect(await screen.findByText(localeRu.translation.errors.required)).toBeVisible();
     expect(await feedbackField.classList.contains('text-danger')).toBe(true);
   });
 
@@ -190,7 +190,7 @@ describe('invalid, empty or existing input value', () => {
     const user = userEvent.setup();
     await user.type(formInput, urlRssInvalid);
     await user.click(btnSubmit);
-    expect(await screen.findByText(localeRu.translation.parsing.fail)).toBeVisible();
+    expect(await screen.findByText(localeRu.translation.errors.noRss)).toBeVisible();
     expect(await feedbackField.classList.contains('text-danger')).toBe(true);
   });
 
@@ -204,7 +204,7 @@ describe('invalid, empty or existing input value', () => {
     formInput.value = '';
     await user.type(formInput, urlRssValid);
     await user.click(btnSubmit);
-    expect(await screen.findByText(localeRu.translation.validation.notOneOf)).toBeVisible();
+    expect(await screen.findByText(localeRu.translation.errors.notOneOf)).toBeVisible();
     expect(await feedbackField.classList.contains('text-danger')).toBe(true);
   }, 30000);
 });

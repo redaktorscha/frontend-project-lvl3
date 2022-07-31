@@ -1,17 +1,14 @@
 export default {
   translation: {
-    validation: {
+    errors: {
       notOneOf: 'RSS уже существует',
       required: 'Не должно быть пустым',
       url: 'Ссылка должна быть валидным URL',
+      noRss: 'Ресурс не содержит валидный RSS',
+      network: 'Ошибка сети',
+      unknown: 'Что-то пошло не так',
     },
-    parsing: {
-      fail: 'Ресурс не содержит валидный RSS',
-    },
-    network: {
-      success: 'RSS успешно загружен',
-      fail: 'Ошибка сети',
-    },
+    success: 'RSS успешно загружен',
     ui: {
       btnRead: 'Просмотр',
     },
