@@ -65,6 +65,10 @@ const processPosts = (posts, feedId) => posts
     },
   }));
 
+/**
+ * @param {Object} error
+ * @returns {string}
+ */
 const getErrorTypeMessage = (error) => {
   if (error.isAxiosError) {
     return 'network';
@@ -75,6 +79,12 @@ const getErrorTypeMessage = (error) => {
   return 'unknown';
 };
 
+/**
+ *
+ * @param {string} url
+ * @param {Object} state
+ * @returns {Promise}
+ */
 const loadRss = (url, state) => {
   const {
     feeds, posts, rssForm,

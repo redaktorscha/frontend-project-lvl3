@@ -1,6 +1,9 @@
 import _ from 'lodash';
 
 class ParsingError extends Error {
+  /**
+ * @param {string} message
+ */
   constructor(message) {
     super(message);
     this.isParsingError = true;

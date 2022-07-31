@@ -105,6 +105,7 @@ const showFormValidationStatus = (isValid, htmlElements) => {
 /**
  * @param {string} formState
  * @param {Object} htmlElements
+ * @param {string} message
  */
 
 const handleFormStateChange = (formState, htmlElements, message) => {
