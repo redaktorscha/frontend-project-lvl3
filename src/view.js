@@ -113,10 +113,10 @@ const handleFormStateChange = (formState, htmlElements, message) => {
     btnSubmit, feedbackField, form, inputElement,
   } = htmlElements;
   switch (formState) {
-    case 'sending':
+    case 'pending':
       btnSubmit.setAttribute('disabled', 'disabled');
       break;
-    case 'processed':
+    case 'succeeded':
       btnSubmit.removeAttribute('disabled');
       feedbackField.classList.remove('text-danger');
       feedbackField.classList.add('text-success');
@@ -177,7 +177,7 @@ const render = (path, value, prevValue, i18next, elements, state) => {
 
   if (path === 'rssForm.processingState') {
     let localizedSuccessMessage = null;
-    if (value === 'processed') {
+    if (value === 'succeeded') {
       localizedSuccessMessage = i18next.t('success');
     }
     handleFormStateChange(value, elements, localizedSuccessMessage);

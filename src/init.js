@@ -89,7 +89,7 @@ const loadRss = (url, state) => {
   const {
     feeds, posts, rssForm,
   } = state;
-  rssForm.processingState = 'sending';
+  rssForm.processingState = 'pending';
   const route = getRoute(proxyUrl, url);
   return axios.get(route)
     .then((response) => {
@@ -110,7 +110,7 @@ const loadRss = (url, state) => {
       state.feeds = [newFeed, ...feeds];
       state.posts = [...newPosts, ...posts];
 
-      rssForm.processingState = 'processed';
+      rssForm.processingState = 'succeeded';
     })
 
     .catch((err) => {
@@ -199,7 +199,7 @@ export default async () => {
     posts: [],
     rssForm: {
       valid: true,
-      processingState: null,
+      processingState: 'idle',
       feedback: null,
     },
     ui: {
