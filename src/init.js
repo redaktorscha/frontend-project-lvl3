@@ -269,5 +269,5 @@ export default async () => {
 
     postsList
       .addEventListener('click', (/** @type {Event} */ e) => handlePostsClick(e, watchedState));
-  }).catch((error) => { throw new Error(error.stack); });
+  });
 };
