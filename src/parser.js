@@ -3,9 +3,11 @@ import _ from 'lodash';
 class ParsingError extends Error {
   /**
  * @param {string} message
+ * @param {string} data
  */
-  constructor(message) {
+  constructor(message, data) {
     super(message);
+    this.data = data;
     this.isParsingError = true;
   }
 }
@@ -24,7 +26,7 @@ export default (xmlString) => {
   const parser = new DOMParser();
   const document = parser.parseFromString(xmlString, 'text/xml');
   if (!_.isNull(document.querySelector('parsererror'))) {
-    throw new ParsingError('failed to parse');
+    throw new ParsingError('failed to parse', xmlString);
   }
 
   const documentTitle = document.querySelector('channel > title');
