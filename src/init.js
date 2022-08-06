@@ -173,9 +173,8 @@ export const getNewPosts = (state, interval) => {
       .catch(console.log);
   });
 
-  Promise.all(promises);
-
-  setTimeout(() => { getNewPosts(state, interval); }, interval);
+  Promise.all(promises)
+    .then(() => setTimeout(() => { getNewPosts(state, interval); }, interval));
 };
 
 export const handlePostsClick = (event, state) => {
