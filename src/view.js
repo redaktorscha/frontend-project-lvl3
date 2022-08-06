@@ -183,7 +183,10 @@ const render = (path, value, prevValue, i18next, elements, state) => {
     handleFormStateChange(value, elements, localizedSuccessMessage);
   }
 
-  if (path === 'rssForm.feedback' && value !== prevValue) {
+  if (path === 'rssForm.feedback') {
+    if (value === prevValue || value === null) {
+      return;
+    }
     const localizedErrorMessage = i18next.t(`errors.${value}`);
     showErrorFeedbackMessage(localizedErrorMessage, elements);
   }
