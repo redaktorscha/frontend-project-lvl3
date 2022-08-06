@@ -22,16 +22,15 @@ const getRssLink = (form) => {
 
 /**
  * @param {string} url
- * @param {Array<Object>} feeds
+ * @param {Array<string>} existingLinks
  * @returns {Promise}
  */
-const validateUrl = (url, feeds) => {
-  const feedsUrls = feeds.map((feed) => feed.url);
+const validateUrl = (url, existingLinks) => {
   const schema = yup.string()
     .trim()
     .required()
     .url()
-    .notOneOf(feedsUrls);
+    .notOneOf(existingLinks);
 
   return schema
     .validate(url)
@@ -83,7 +82,6 @@ const getErrorTypeMessage = (error) => {
  *
  * @param {string} url
  * @param {Object} state
- * @returns {Promise}
  */
 const loadRss = (url, state) => {
   const {
@@ -91,7 +89,7 @@ const loadRss = (url, state) => {
   } = state;
   rssForm.processingState = 'pending';
   const route = getRoute(proxyUrl, url);
-  return axios.get(route)
+  axios.get(route)
     .then((response) => {
       const { data: { contents } } = response;
 
@@ -128,8 +126,9 @@ export const handleSubmit = (event, state) => {
   const rssLink = getRssLink(/** @type {HTMLFormElement} */(event.target));
 
   const { feeds, rssForm } = state;
+  const existingFeedsLinks = feeds.map((feed) => feed.url);
 
-  validateUrl(rssLink, feeds)
+  validateUrl(rssLink, existingFeedsLinks)
     .then((errorMessage) => {
       if (errorMessage) {
         rssForm.valid = false;
