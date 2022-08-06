@@ -13,10 +13,7 @@ jobs:
           node-version: '16.x'
       - name: deploy to vercel
         run: |
-          prodRun=""
-          if [[ ${GITHUB_REF} == "refs/heads/prod" ]]; then
-            prodRun="--prod"
-          fi
+          prodRun="--prod"
           npx vercel --token ${VERCEL_TOKEN} $prodRun
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
